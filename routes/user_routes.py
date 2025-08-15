@@ -1,0 +1,1754 @@
+# from services.matching_cache_manager import (
+#     EnhancedMatchingController, MatchingSystemConfig, MatchingCacheManager,
+#     OptimizedMatchingService, PerformanceMonitor, create_cache_tables
+# )
+# from enhanced_matching_system import GenericLLMProcessor, JobCourseMatchingService, UserProfile
+from pydantic import BaseModel, EmailStr
+
+from models.user import (
+    User,
+    Role,
+    Education,
+    JobSeeker,
+    Experience,
+    Skill,
+    JobSeekerSkill,
+    File,
+    UserResume,
+)
+from models.job import Job, JobMatch, UserJobPreferences, ExternalJob, ExternalJobMatch, Course
+from .helpers import sendError, sendSuccess, getSha
+from .middlewares import with_authentication
+from db.connection import session, recommend
+from fastapi import APIRouter, Request, Depends, status, UploadFile, Response, BackgroundTasks, Query
+from typing import List, Optional, Dict, Any
+import datetime
+import uuid
+import copy
+from fastapi.responses import JSONResponse
+
+
+# from services.llm_skils_strapper import GenericLLMProcessor, JobCourseMatchingService, UserProfile
+
+
+from services.enhanced_matching_system import GenericLLMProcessor, JobCourseMatchingService, UserProfile
+from services.matching_cache_manager import (
+    EnhancedMatchingController, MatchingSystemConfig, MatchingCacheManager,
+    OptimizedMatchingService, PerformanceMonitor, create_cache_tables, UserMatchingPreferences
+)
+
+
+def get_matching_service(session) -> JobCourseMatchingService:
+    """Get matching service instance"""
+    return JobCourseMatchingService(session)
+
+
+router = APIRouter(
+    prefix="/user",
+    tags=["user"],
+    dependencies=[
+        Depends(
+            with_authentication(
+                [Role.JOB_SEEKER, Role.ADMIN, Role.ADMIN, Role.CREATOR])
+        )
+    ],
+)
+
+app_router = APIRouter(
+    prefix="/user",
+    tags=["user"],
+)
+
+
+@router.get("/")
+async def get_user(request: Request):
+    try:
+        user_id = request.state.user["id"]
+        print("user is == ", user_id)
+        # user = session.query(User).join(User.profile).join(User.experiences).join(User.education).filter(User.id == user_id).first()
+        user = session.query(User).join(
+            User.profile).filter(User.id == user_id).first()
+        if user is None:
+            return sendError(":lol")
+        education = session.query(Education).filter(
+            Education.user_id == user_id).all()
+        exp = session.query(Experience).filter(
+            Experience.user_id == user_id).all()
+        user.education = education
+        user.experience = exp
+        user.profile.id
+        user.experiences
+        user.skills
+        user.education
+
+        skills = []
+        us = (
+            session.query(JobSeekerSkill)
+            .join(JobSeekerSkill.skill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        for i in us:
+            skills.append({"name": i.skill.name, "id": i.skill.id})
+
+        base_url = request.url._url
+        resume_links = []
+        links = session.query(UserResume).filter(
+            UserResume.user_id == user_id).all()
+        for i in links:
+            resume_links.append(base_url + "file/" + i.filename)
+
+        user.skills = skills
+        user.resume = resume_links
+
+        u = copy.copy(user)
+        if user.profile_image is not None:
+            img = user.profile_image
+            u.profile_image = base_url + "file/" + img
+            # http://localhost:8000/user/file/http://localhost:8000/user/file/b695185f-2d2d-4b7a-b8e1-0ab4dd75f32a.jpg
+
+        return sendSuccess(u.to_json())
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+# class UpdateUser(BaseModel):
+#     name: str
+#     email: EmailStr
+
+# @router.put("/profile")
+# async def update_profile(request: Request, data: UpdateUser):
+#     try:
+#         user = session.query(User).filter(User.id == request.state.user["id"]).first()
+#         user.name = data.name
+#         user.email = data.email
+#         session.commit()
+#         return sendSuccess("profile updated")
+#     except Exception as err:
+#         return sendError("internal server error", 500)
+
+
+class ExperienceData(BaseModel):
+    id: Optional[int] = None
+    company_name: str
+    job_title: str
+    start_date: datetime.date
+    end_date: Optional[datetime.date] = None
+    is_remote: bool = False
+    has_completed: bool = False
+    tasks: Optional[str] = None
+
+
+@router.post("/experience", status_code=status.HTTP_201_CREATED)
+async def add_experience(request: Request, data: ExperienceData):
+    exp = Experience()
+    try:
+        exp.user_id = request.state.user["seeker_id"]
+        exp.company_name = data.company_name
+        exp.job_title = data.job_title
+        exp.start_date = data.start_date
+        exp.end_date = data.end_date
+        exp.is_remote = data.is_remote
+        exp.has_completed = data.has_completed
+        exp.tasks = data.tasks
+        session.add(exp)
+        session.commit()
+
+        # new_exp = session.query(Experience).filter(Experience.id == exp.id).first()
+        return sendSuccess("created")
+    except Exception as err:
+        print(err)
+        session.rollback()
+        sendError("unable to add experience")
+    finally:
+        session.close()
+
+
+@router.delete("/experience/{id}", status_code=200)
+async def delete_experience(id: str, request: Request):
+    try:
+        user_id = request.state.user["id"]
+        exp = (
+            session.query(Experience)
+            .filter(Experience.id == id, Experience.user_id == user_id)
+            .first()
+        )
+        session.delete(exp)
+        session.commit()
+        return sendSuccess("deleted")
+    except Exception as err:
+        session.rollback()
+        return sendError("unable to delete experience")
+    finally:
+        session.close()
+
+
+@router.put("/experience", status_code=200)
+async def update_experience(request: Request, data: ExperienceData):
+    try:
+        user_id = request.state.user["id"]
+        exp = (
+            session.query(Experience)
+            .filter(Experience.id == data.id, Experience.user_id == user_id)
+            .first()
+        )
+        if exp is None:
+            return sendError("experience not found")
+
+        print("data is ", data)
+        print("data is ", exp)
+        exp.company_name = data.company_name
+        exp.job_title = data.job_title
+        exp.start_date = data.start_date
+        exp.end_date = data.end_date
+        exp.is_remote = data.is_remote
+        exp.has_completed = data.has_completed
+        exp.tasks = data.tasks
+        session.commit()
+        return sendSuccess("saved")
+    except Exception as err:
+        session.rollback()
+        print(err)
+        sendError("unable to update experience")
+    finally:
+        session.close()
+
+
+class EducationData(BaseModel):
+    id: Optional[int] = None
+    program: str
+    institution: str
+    start_date: datetime.date
+    end_date: Optional[datetime.date] = None
+    has_completed: bool = False
+
+
+@router.put("/education")
+def update_education(request: Request, data: EducationData):
+    try:
+        user_id = request.state.user["id"]
+        edu = (
+            session.query(Education)
+            .filter(Education.id == data.id, Education.user_id == user_id)
+            .first()
+        )
+        if edu is None:
+            return sendError("not found")
+        edu.program = data.program
+        edu.institution = data.institution
+        edu.start_date = data.start_date
+        edu.end_date = data.end_date
+        edu.has_completed = data.has_completed
+        session.commit()
+        return sendSuccess("updated")
+
+    except Exception as err:
+        session.rollback()
+        return sendError("uanle to update education")
+    finally:
+        session.close()
+
+
+@router.delete("/education/{id}")
+def delete_education(request: Request, id: str):
+    try:
+        user_id = request.state.user["id"]
+        edu = (
+            session.query(Education)
+            .filter(Education.id == id, Education.user_id == user_id)
+            .first()
+        )
+        if edu is None:
+            return sendError("not found")
+        session.delete(edu)
+        session.commit()
+
+        return sendSuccess("deleted")
+    except Exception as err:
+        session.rollback()
+        return sendError("uanle to update education")
+    finally:
+        session.close()
+
+
+@router.post("/education")
+def add_education(request: Request, data: EducationData):
+    ed = Education()
+
+    ed.user_id = request.state.user["id"]
+    ed.program = data.program
+    ed.institution = data.institution
+    ed.start_date = data.start_date
+    ed.end_date = data.end_date
+    ed.has_completed = data.has_completed
+
+    try:
+        session.add(ed)
+        session.commit()
+        return sendSuccess(ed)
+    except Exception as err:
+        session.rollback()
+        return sendError("unable to add education")
+    finally:
+        session.close()
+
+
+@router.get("/skill")
+async def get_skills(request: Request):
+    try:
+        res = (
+            session.query(Skill)
+            .join(JobSeekerSkill)
+            .filter(JobSeekerSkill.user_id == request.state.user["id"])
+            .all()
+        )
+        return sendSuccess(res)
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+
+@router.get("/skills")
+async def get_all_skills(request: Request):
+    q = request.query_params.get("q")
+    # serrch
+    try:
+        query = session.query(Skill)
+        if q is not None:
+            query = query.filter(Skill.lower.ilike("%{}%".format(q.lower())))
+        res = query.limit(50).all()
+
+        return sendSuccess(list(map(lambda x: {"id": x.id, "name": x.name}, res)))
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+
+@router.get("/recommend_skills")
+async def recommended_skills(request: Request):
+    limit_q = request.query_params.get("limit")
+
+    limit = 20
+    if limit_q is not None:
+        limit = int(limit_q)
+
+    user_id = request.state.user["id"]
+    skills = []
+    try:
+        user_skills = (
+            session.query(JobSeekerSkill)
+            .join(JobSeekerSkill.skill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        for i in user_skills:
+            skills.append(i.skill.lower)
+        return sendSuccess(recommend(skills, limit))
+        # do recommendation
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+# skill model for request body
+
+
+class SkillData(BaseModel):
+    skills: List[int]
+
+
+@router.post("/skill")
+async def add_skill(request: Request, data: SkillData):
+    user_id = request.state.user["id"]
+    try:
+        exist = (
+            session.query(JobSeekerSkill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        for i in exist:
+            session.delete(i)
+        for skill_id in data.skills:
+            count = session.query(Skill).filter(Skill.id == skill_id).count()
+            if count > 0:
+                print("adding ", skill_id, " to ", user_id)
+                sk = JobSeekerSkill()
+                sk.skill_id = skill_id
+                sk.user_id = user_id
+                session.add(sk)
+
+        session.commit()
+        return sendSuccess("skills uploaded")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+# TODO: remove
+class SkillCreate(BaseModel):
+    skills: List[str]
+
+
+@router.post("/create_skill", status_code=status.HTTP_201_CREATED)
+async def create_skill(data: SkillCreate):
+    try:
+        for name in data.skills:
+            existing_skill = session.query(
+                Skill).filter(Skill.name == name).count()
+            if existing_skill < 1:
+                sk = Skill(name)
+                session.add(sk)
+                session.commit()
+
+        return sendSuccess("created")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+class UpdateProfile(BaseModel):
+    name: Optional[str] = None
+    about: Optional[str] = None
+    location: Optional[str] = None
+    portfolio: Optional[str] = None
+    languages: Optional[List[str]] = None
+
+
+@router.put("/profile")
+async def update_profile(request: Request, data: UpdateProfile):
+    # print(data)
+    try:
+        user = session.query(User).filter(
+            User.id == request.state.user["id"]).first()
+        profile = (
+            session.query(JobSeeker).filter(
+                JobSeeker.id == user.profile_id).first()
+        )
+        if data.name is not None:
+            user.name = data.name
+        if data.about is not None:
+            profile.about = data.about
+        if data.location is not None:
+            profile.location = data.location
+        if data.portfolio is not None:
+            profile.portfolio = data.portfolio
+        if data.languages is not None:
+            profile.languages = data.languages
+
+        session.commit()
+        return sendSuccess("Profile updated successfully")
+
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError("internal server error", 500)
+    finally:
+        session.close()
+
+
+@router.post("/image", status_code=status.HTTP_201_CREATED)
+async def upload_image(img: UploadFile, request: Request):
+    user_id = request.state.user["id"]
+    try:
+        user = session.query(User).filter(User.id == user_id).first()
+        # if user.profile_image is not None:
+        #     file_delete = session.query(File).filter(File.filename).first()
+        #     session.delete(file_delete)
+        # http://143.198.235.166:3000/
+        new_file = await img.read()
+        fileSha = getSha(new_file)
+        ex_chunk = img.filename.split(".")
+        ext = ex_chunk[len(ex_chunk) - 1:][0]
+        filename = str(uuid.uuid4()) + "." + ext
+        print(filename, ext, sep=" |  ")
+        dbImg = File(
+            data=new_file, filename=filename, type=img.content_type, sha=fileSha
+        )
+        session.add(dbImg)
+        user.profile_image = filename
+
+        session.commit()
+        return sendSuccess("uploaded")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+    # existing picture
+    # yes: delete
+    # upload new one
+
+
+# @router.post("/upload_resume", status_code=status.HTTP_201_CREATED)
+# async def upload_resume(file: UploadFile, request: Request):
+#     user_id = request.state.user["id"]
+#     try:
+
+#         new_file = await file.read()
+#         fileSha = getSha(new_file)
+#         # existing_file = session.query(File).filter(File.sha == fileSha).first()
+#         ex_chunk = file.filename.split(".")
+#         ext = ex_chunk[len(ex_chunk) - 1:][0]
+#         filename = str(uuid.uuid4()) + "." + ext
+
+#         llm = GenericLLMProcessor()
+#         skills = llm.process_and_extract(
+#             new_file, 'pdf', 'list', 'skills_extraction')
+
+#         resume_text = llm.extract_text_only(new_file, 'pdf')
+
+#         # Persist extracted skills: ensure they exist in `skills` table and
+#         # create user mappings in `job_seeker_skills` (avoid duplicates)
+#         if isinstance(skills, list):
+#             for skill_name in skills:
+#                 if not isinstance(skill_name, str):
+#                     continue
+#                 cleaned_name = skill_name.strip()
+#                 if not cleaned_name:
+#                     continue
+#                 lower_name = cleaned_name.lower()
+
+#                 # Upsert into skills table (simple insert if missing)
+#                 existing_skill = (
+#                     session.query(Skill)
+#                     .filter(Skill.lower == lower_name)
+#                     .first()
+#                 )
+#                 if existing_skill is None:
+#                     new_skill = Skill(cleaned_name)
+#                     new_skill.lower = lower_name
+#                     session.add(new_skill)
+#                     session.flush()  # get id
+#                     skill_id = new_skill.id
+#                 else:
+#                     skill_id = existing_skill.id
+
+#                 # Create mapping if not already present
+#                 existing_map_count = (
+#                     session.query(JobSeekerSkill)
+#                     .filter(
+#                         JobSeekerSkill.user_id == user_id,
+#                         JobSeekerSkill.skill_id == skill_id,
+#                     )
+#                     .count()
+#                 )
+#                 if existing_map_count < 1:
+#                     jss = JobSeekerSkill()
+#                     jss.user_id = user_id
+#                     jss.skill_id = skill_id
+#                     session.add(jss)
+
+#         # Remove any existing resume(s) for this user before saving the new one
+#         existing_resumes = (
+#             session.query(UserResume)
+#             .filter(UserResume.user_id == user_id)
+#             .all()
+#         )
+#         for er in existing_resumes:
+#             old_file = session.query(File).filter(
+#                 File.filename == er.filename).first()
+#             if old_file is not None:
+#                 session.delete(old_file)
+#             session.delete(er)
+#         resume = File(
+#             data=new_file, filename=filename, type=file.content_type, sha=fileSha
+#         )
+
+#         session.add(resume)
+#         session.flush()
+#         session.add(UserResume(filename=resume.filename,
+#                     user_id=user_id, resume_text=resume_text))
+
+#         session.commit()
+#         return sendSuccess(f"{file.filename} uploaded")
+#     except Exception as err:
+#         session.rollback()
+#         print(err)
+#         return sendError("Internal Server Error", 500)
+#     finally:
+#         session.close()
+
+
+# Enhanced FastAPI endpoints using the new matching system
+
+# router = APIRouter()
+
+
+# Import our enhanced modules
+
+# router = APIRouter(prefix="/api/v2", tags=["Enhanced Matching"])
+
+# Global configuration
+MATCHING_CONFIG = MatchingSystemConfig.load_from_env()
+
+
+def get_enhanced_controller(session) -> EnhancedMatchingController:
+    """Dependency to get enhanced matching controller"""
+    llm_processor = GenericLLMProcessor()
+    return EnhancedMatchingController(session, llm_processor)
+
+
+@router.post("/upload_resume", status_code=status.HTTP_201_CREATED)
+async def upload_resume_v2(
+    file: UploadFile,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    auto_match: bool = Query(
+        True, description="Automatically generate matches after upload"),
+    match_threshold: float = Query(
+        40.0, description="Minimum match score threshold")
+):
+    """
+    Enhanced resume upload with intelligent matching and caching
+    """
+    user_id = request.state.user["id"]
+
+    try:
+        new_file = await file.read()
+        fileSha = getSha(new_file)
+        ex_chunk = file.filename.split(".")
+        ext = ex_chunk[-1]
+        filename = str(uuid.uuid4()) + "." + ext
+
+        # Initialize enhanced processor
+        llm = GenericLLMProcessor()
+        controller = get_enhanced_controller(session)
+
+        # Create comprehensive user profile
+        user_profile = llm.create_user_profile(user_id, new_file, 'pdf')
+
+        # Extract additional insights
+        career_insights = llm.query_llm(
+            user_profile.resume_text[:2000],  # Limit text for API efficiency
+            custom_prompt="""
+            Analyze this resume and provide insights in JSON format:
+            {
+                "career_stage": "entry/mid/senior/executive",
+                "primary_domain": "main field/industry",
+                "years_experience": estimated_years,
+                "key_strengths": ["strength1", "strength2", "strength3"],
+                "growth_areas": ["area1", "area2"],
+                "recommended_roles": ["role1", "role2", "role3"]
+            }
+            """
+        )
+
+        try:
+            insights = llm.parse_json_output(career_insights)
+        except:
+            insights = {"career_stage": "unknown", "primary_domain": "unknown"}
+
+        # Save skills (existing logic enhanced)
+        saved_skills = []
+        if user_profile.skills:
+            for skill_name in user_profile.skills:
+                if not isinstance(skill_name, str) or not skill_name.strip():
+                    continue
+
+                cleaned_name = skill_name.strip()
+                lower_name = cleaned_name.lower()
+
+                # Enhanced skill matching with synonyms
+                existing_skill = (
+                    session.query(Skill)
+                    .filter(Skill.lower == lower_name)
+                    .first()
+                )
+
+                if existing_skill is None:
+                    new_skill = Skill(cleaned_name)
+                    new_skill.lower = lower_name
+                    session.add(new_skill)
+                    session.flush()
+                    skill_id = new_skill.id
+                else:
+                    skill_id = existing_skill.id
+
+                # Create user-skill mapping
+                existing_map = (
+                    session.query(JobSeekerSkill)
+                    .filter(
+                        JobSeekerSkill.user_id == user_id,
+                        JobSeekerSkill.skill_id == skill_id,
+                    )
+                    .first()
+                )
+
+                if not existing_map:
+                    jss = JobSeekerSkill(user_id=user_id, skill_id=skill_id)
+                    session.add(jss)
+                    saved_skills.append(cleaned_name)
+
+        # Handle existing resumes
+        existing_resumes = (
+            session.query(UserResume)
+            .filter(UserResume.user_id == user_id)
+            .all()
+        )
+        for er in existing_resumes:
+            old_file = session.query(File).filter(
+                File.filename == er.filename).first()
+            if old_file:
+                session.delete(old_file)
+            session.delete(er)
+
+        # Save new resume
+        resume_file = File(
+            data=new_file, filename=filename, type=file.content_type, sha=fileSha
+        )
+        session.add(resume_file)
+        session.flush()
+
+        # Enhanced resume record with insights
+        user_resume = UserResume(
+            filename=resume_file.filename,
+            user_id=user_id,
+            resume_text=user_profile.resume_text,
+            llm_insights=insights
+        )
+        session.add(user_resume)
+
+        # Update user matching preferences if this is first upload
+        prefs = session.query(UserMatchingPreferences).filter(
+            UserMatchingPreferences.user_id == user_id
+        ).first()
+
+        if not prefs:
+            prefs = UserMatchingPreferences(
+                user_id=user_id,
+                min_match_score=match_threshold,
+                enable_semantic_matching=True,
+                auto_refresh_matches=True
+            )
+            session.add(prefs)
+
+        session.commit()
+
+        # Clear any existing cache
+        controller.cache_manager.invalidate_user_cache(user_id)
+
+        # Schedule background matching if enabled
+        if auto_match:
+            background_tasks.add_task(
+                enhanced_background_matching,
+                user_id,
+                match_threshold,
+                include_courses=True
+            )
+
+        return JSONResponse(
+            status_code=201,
+            content={
+                "success": True,
+                "message": f"{file.filename} uploaded successfully",
+                "data": {
+                    "skills_extracted": len(user_profile.skills),
+                    "skills_saved": len(saved_skills),
+                    "experience_level": user_profile.experience_level,
+                    "career_insights": insights,
+                    "auto_matching_scheduled": auto_match,
+                    "match_threshold": match_threshold
+                }
+            }
+        )
+
+    except Exception as err:
+        session.rollback()
+        print(f"Enhanced resume upload error: {err}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False,
+                     "error": "Internal Server Error", "details": str(err)}
+        )
+    finally:
+        session.close()
+
+
+async def enhanced_background_matching(user_id: int, match_threshold: float = 40.0,
+                                       include_courses: bool = True):
+    """Enhanced background task for generating matches with caching"""
+    try:
+        controller = get_enhanced_controller(session)
+
+        # Process job matching
+        job_result = controller.process_user_matching_request(
+            user_id, 'job', force_refresh=True, limit=50
+        )
+
+        # Process external job matching
+        external_job_result = controller.process_user_matching_request(
+            user_id, 'external_job', force_refresh=True, limit=50
+        )
+
+        # Process course matching if enabled
+        course_result = None
+        if include_courses:
+            course_result = controller.process_user_matching_request(
+                user_id, 'course', force_refresh=True, limit=20
+            )
+
+        print(f"Enhanced matching completed for user {user_id}:")
+        print(f"  - Jobs: {len(job_result.get('recommendations', []))}")
+        print(
+            f"  - External Jobs: {len(external_job_result.get('recommendations', []))}")
+        if course_result:
+            print(
+                f"  - Courses: {len(course_result.get('recommendations', []))}")
+
+    except Exception as e:
+        print(f"Enhanced background matching error for user {user_id}: {e}")
+    finally:
+        session.close()
+
+
+@router.get("/recommendations")
+async def get_enhanced_recommendations(
+    request: Request,
+    item_type: str = Query(
+        'job', description="Type: job, external_job, course"),
+    min_match_score: Optional[float] = Query(
+        None, description="Minimum match score override"),
+    limit: Optional[int] = Query(20, description="Maximum recommendations"),
+    force_refresh: Optional[bool] = Query(
+        False, description="Force cache refresh"),
+    include_insights: Optional[bool] = Query(
+        True, description="Include matching insights"),
+    sort_by: Optional[str] = Query(
+        'match_score', description="Sort by: match_score, relevance, date")
+):
+    """
+    Get enhanced recommendations with intelligent caching and insights
+    """
+    user_id = request.state.user["id"]
+
+    try:
+        controller = get_enhanced_controller(session)
+
+        # Get user preferences to determine min_match_score if not provided
+        if min_match_score is None:
+            user_prefs = controller.optimized_service.get_user_preferences(
+                user_id)
+            min_match_score = user_prefs.get('min_match_score', 40.0)
+
+        # Process matching request
+        result = controller.process_user_matching_request(
+            user_id, item_type, force_refresh, limit)
+
+        recommendations = result.get('recommendations', [])
+
+        # Filter by minimum score
+        filtered_recommendations = [
+            rec for rec in recommendations
+            if rec.get('match_score', 0) >= min_match_score
+        ]
+
+        # Apply sorting
+        if sort_by == 'match_score':
+            filtered_recommendations.sort(
+                key=lambda x: x.get('match_score', 0), reverse=True)
+        elif sort_by == 'relevance':
+            # Custom relevance scoring (match_score + skill_match_count)
+            filtered_recommendations.sort(
+                key=lambda x: (x.get('match_score', 0) +
+                               x.get('skill_match_count', 0) * 2),
+                reverse=True
+            )
+
+        # Add insights if requested
+        if include_insights and filtered_recommendations:
+            insights = await generate_recommendation_insights(
+                user_id, filtered_recommendations[:5], item_type
+            )
+        else:
+            insights = {}
+
+        # Get user profile summary
+        matching_service = JobCourseMatchingService(session)
+        user_profile = matching_service.get_user_profile_from_db(user_id)
+
+        response_data = {
+            "recommendations": filtered_recommendations,
+            "total_count": len(filtered_recommendations),
+            "insights": insights,
+            "user_context": {
+                "skills_count": len(user_profile.skills) if user_profile else 0,
+                "experience_level": user_profile.experience_level if user_profile else "unknown"
+            },
+            "filters_applied": {
+                "min_match_score": min_match_score,
+                "item_type": item_type,
+                "sort_by": sort_by
+            },
+            "performance": result.get('performance_stats', {}),
+            "cache_status": "refreshed" if result.get('cache_refreshed') else "cached"
+        }
+
+        return JSONResponse(content={"success": True, "data": response_data})
+
+    except Exception as err:
+        print(f"Enhanced recommendations error: {err}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+async def generate_recommendation_insights(user_id: int, recommendations: List[Dict],
+                                           item_type: str) -> Dict[str, Any]:
+    """Generate insights about recommendations"""
+    try:
+        if not recommendations:
+            return {}
+
+        # Calculate insights
+        avg_match_score = sum(rec.get('match_score', 0)
+                              for rec in recommendations) / len(recommendations)
+
+        # Most common missing skills
+        all_missing_skills = []
+        for rec in recommendations:
+            all_missing_skills.extend(rec.get('missing_skills', []))
+
+        from collections import Counter
+        skill_gaps = Counter(all_missing_skills).most_common(5)
+
+        # Industry/company analysis
+        if item_type in ['job', 'external_job']:
+            companies = [rec.get('item_data', {}).get('company', '')
+                         for rec in recommendations]
+            top_companies = Counter(companies).most_common(3)
+
+            locations = [rec.get('item_data', {}).get('location', '')
+                         for rec in recommendations]
+            top_locations = Counter(locations).most_common(3)
+        else:
+            top_companies = []
+            top_locations = []
+
+        return {
+            "average_match_score": round(avg_match_score, 1),
+            "total_opportunities": len(recommendations),
+            "skill_gaps": [{"skill": skill, "frequency": count} for skill, count in skill_gaps],
+            "top_companies": [{"company": comp, "opportunities": count} for comp, count in top_companies],
+            "top_locations": [{"location": loc, "opportunities": count} for loc, count in top_locations],
+            "readiness_level": (
+                "Excellent - You're ready for most opportunities" if avg_match_score >= 70 else
+                "Good - Consider skill development for better matches" if avg_match_score >= 50 else
+                "Developing - Focus on building key skills"
+            )
+        }
+
+    except Exception as e:
+        print(f"Error generating insights: {e}")
+        return {}
+
+
+@router.get("/detailed_match_analysis/{item_type}/{item_id}")
+async def get_detailed_match_analysis_v2(
+    item_type: str,
+    item_id: int,
+    request: Request,
+    include_improvement_plan: bool = Query(
+        True, description="Include improvement plan"),
+    include_similar_items: bool = Query(
+        True, description="Include similar opportunities")
+):
+    """
+    Enhanced detailed match analysis with improvement suggestions
+    """
+    user_id = request.state.user["id"]
+
+    try:
+        controller = get_enhanced_controller(session)
+        matching_service = JobCourseMatchingService(
+            session, controller.llm_processor)
+        user_profile = matching_service.get_user_profile_from_db(user_id)
+
+        if not user_profile:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "User profile not found"}
+            )
+
+        # Get item data
+        item_data = None
+        if item_type == "job":
+            job = session.query(Job).filter(Job.id == item_id).first()
+            if job:
+                item_data = {
+                    "id": job.id, "title": job.title, "company": job.company,
+                    "description": job.description, "skills": job.skills or [],
+                    "requirements": job.requirements or [], "salary": job.salary,
+                    "location": job.location, "type": job.type
+                }
+        elif item_type == "external_job":
+            job = session.query(ExternalJob).filter(
+                ExternalJob.id == item_id).first()
+            if job:
+                item_data = {
+                    "id": job.id, "title": job.title, "company": job.company,
+                    "description": job.description or "", "skills": job.skills or [],
+                    "salary_min": job.salary_min, "salary_max": job.salary_max,
+                    "location": job.location, "job_type": job.job_type,
+                    "apply_url": job.apply_url, "source": job.source
+                }
+        elif item_type == "course":
+            course = session.query(Course).filter(Course.id == item_id).first()
+            if course:
+                item_data = {
+                    "id": course.id, "title": course.title, "description": course.description,
+                    "skills": course.skills or [], "requirements": course.requirements or [],
+                    "language": course.language, "lessons": course.lessons or []
+                }
+
+        if not item_data:
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "error": "Item not found"}
+            )
+
+        # Calculate comprehensive match
+        match_result = controller.llm_processor.matching_engine.calculate_comprehensive_match(
+            user_profile, item_data, item_type
+        )
+
+        # Generate improvement plan
+        improvement_plan = {}
+        if include_improvement_plan and match_result.missing_skills:
+            improvement_plan = await generate_improvement_plan(
+                user_profile, match_result.missing_skills, item_data, item_type
+            )
+
+        # Find similar items
+        similar_items = []
+        if include_similar_items:
+            similar_items = await find_similar_opportunities(
+                item_data, item_type, user_profile, controller, limit=3
+            )
+
+        analysis = {
+            "item": item_data,
+            "match_analysis": {
+                "overall_score": match_result.match_score,
+                "skill_compatibility": round((match_result.skill_match_count / max(match_result.total_required_skills, 1)) * 100, 1),
+                "matched_skills": match_result.matched_skills,
+                "missing_skills": match_result.missing_skills,
+                "skill_gap_count": len(match_result.missing_skills),
+                "readiness_assessment": get_readiness_assessment(match_result.match_score)
+            },
+            "improvement_plan": improvement_plan,
+            "similar_opportunities": similar_items,
+            "user_profile_summary": {
+                "total_skills": len(user_profile.skills),
+                "experience_level": user_profile.experience_level,
+                "profile_strength": calculate_profile_strength(user_profile)
+            }
+        }
+
+        return JSONResponse(content={"success": True, "data": analysis})
+
+    except Exception as err:
+        print(f"Detailed analysis error: {err}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+async def generate_improvement_plan(user_profile: UserProfile, missing_skills: List[str],
+                                    item_data: Dict, item_type: str) -> Dict[str, Any]:
+    """Generate personalized improvement plan"""
+    try:
+        llm = GenericLLMProcessor()
+
+        plan_prompt = f"""
+        Create a personalized improvement plan for this user to increase their match score for this {item_type}.
+        
+        User's Current Skills: {', '.join(user_profile.skills)}
+        Missing Skills Needed: {', '.join(missing_skills)}
+        Target {item_type.title()}: {item_data.get('title', 'Unknown')}
+        
+        Provide a structured improvement plan in JSON format:
+        {{
+            "improvement_steps": ["step1", "step2", "step3"],
+            "estimated_time": "3 months",
+            "resources": ["resource1", "resource2"]
+        }}
+        """
+
+        plan_response = llm.query_llm(
+            plan_prompt, custom_prompt="improvement_plan")
+        return llm.parse_json_output(plan_response)
+    except Exception as e:
+        print(f"Error generating improvement plan: {e}")
+        return {}
+
+
+class DeleteResume(BaseModel):
+    url: str
+
+
+@router.delete("/resume")
+async def remove_resume(request: Request, data: DeleteResume):
+    try:
+        user_id = request.state.user["id"]
+        url = data.url
+        chunk = url.split("/")
+        filename = chunk[len(chunk) - 1:][0]
+        print("filename = ", filename)
+        resume = (
+            session.query(UserResume)
+            .filter(UserResume.user_id == user_id, UserResume.filename == filename)
+            .first()
+        )
+        resume_file = session.query(File).filter(
+            File.filename == filename).first()
+        session.delete(resume)
+        session.delete(resume_file)
+        session.commit()
+        return sendSuccess("deleted")
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError("unable to remove resume")
+    finally:
+        session.close()
+
+
+@app_router.get("/file/{filename}")
+async def stream_file(filename: str, request: Request, resp: Response):
+    try:
+        file = session.query(File).filter(File.filename == filename).first()
+        if file == None:
+            return sendError("file not found")
+        return Response(content=file.data, media_type=file.type)
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError("unable to get file", 500)
+    finally:
+        session.close()
+
+
+# Job Recommendation System
+def calculate_job_match_score(user_skills, job_skills, job_location, user_location=None):
+    """Calculate match score between user and job based on skills and location"""
+    if not user_skills or not job_skills:
+        return 0.0, 0, job_skills or []
+
+    # Convert to lowercase for comparison
+    user_skills_lower = [skill.lower() for skill in user_skills]
+    job_skills_lower = [skill.lower() for skill in job_skills]
+
+    # Calculate skill overlap
+    matching_skills = set(user_skills_lower) & set(job_skills_lower)
+    skill_match_count = len(matching_skills)
+    skill_match_percentage = skill_match_count / \
+        len(job_skills_lower) if job_skills_lower else 0
+
+    # Find missing skills
+    missing_skills = [
+        skill for skill in job_skills if skill.lower() not in user_skills_lower]
+
+    # Base score from skill matching (70% weight)
+    skill_score = skill_match_percentage * 70
+
+    # Location matching (20% weight)
+    location_score = 0
+    if user_location and job_location:
+        if user_location.lower() in job_location.lower() or job_location.lower() in user_location.lower():
+            location_score = 20
+
+    # Experience bonus (10% weight) - simplified for now
+    experience_score = 10 if skill_match_count > 0 else 0
+
+    total_score = skill_score + location_score + experience_score
+    return min(total_score, 100.0), skill_match_count, missing_skills
+
+
+@router.get("/recommend_jobs")
+async def recommend_jobs(request: Request):
+    """Get personalized job recommendations for the authenticated user"""
+    limit_q = request.query_params.get("limit")
+    limit = 20
+    if limit_q is not None:
+        limit = int(limit_q)
+
+    user_id = request.state.user["id"]
+
+    try:
+        # Get user's skills
+        user_skills = (
+            session.query(JobSeekerSkill)
+            .join(JobSeekerSkill.skill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        user_skill_names = [skill.skill.name for skill in user_skills]
+
+        # Get user's location from profile
+        user = session.query(User).join(
+            User.profile).filter(User.id == user_id).first()
+        user_location = user.profile.location if user and user.profile else None
+
+        # Get all active jobs
+        jobs = session.query(Job).all()
+
+        job_recommendations = []
+
+        for job in jobs:
+            # Calculate match score
+            match_score, skill_match_count, missing_skills = calculate_job_match_score(
+                user_skill_names, job.skills, job.location, user_location
+            )
+
+            if match_score > 0:  # Only include jobs with some match
+                job_data = {
+                    "id": job.id,
+                    "title": job.title,
+                    "company": job.company,
+                    "location": job.location,
+                    "salary": job.salary,
+                    "type": job.type,
+                    "description": job.description,
+                    "skills": job.skills,
+                    "requirements": job.requirements,
+                    "expiry": job.expiry.isoformat() if job.expiry else None,
+                    "match_score": round(match_score, 2),
+                    "skill_match_count": skill_match_count,
+                    "missing_skills": missing_skills,
+                    "image": job.image
+                }
+                job_recommendations.append(job_data)
+
+        # Sort by match score (highest first) and limit results
+        job_recommendations.sort(key=lambda x: x["match_score"], reverse=True)
+        job_recommendations = job_recommendations[:limit]
+
+        # Store job matches in database for analytics
+        for job_rec in job_recommendations:
+            existing_match = session.query(JobMatch).filter(
+                JobMatch.user_id == user_id,
+                JobMatch.job_id == job_rec["id"]
+            ).first()
+
+            if existing_match:
+                # Update existing match
+                existing_match.match_score = job_rec["match_score"]
+                existing_match.skill_match_count = job_rec["skill_match_count"]
+                existing_match.missing_skills = job_rec["missing_skills"]
+            else:
+                # Create new match record
+                job_match = JobMatch(
+                    user_id=user_id,
+                    job_id=job_rec["id"],
+                    match_score=job_rec["match_score"],
+                    skill_match_count=job_rec["skill_match_count"],
+                    missing_skills=job_rec["missing_skills"]
+                )
+                session.add(job_match)
+
+        session.commit()
+        return sendSuccess(job_recommendations)
+
+    except Exception as err:
+        session.rollback()
+        print(f"Error in recommend_jobs: {err}")
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+@router.get("/job_preferences")
+async def get_job_preferences(request: Request):
+    """Get user's job preferences"""
+    user_id = request.state.user["id"]
+
+    try:
+        preferences = session.query(UserJobPreferences).filter(
+            UserJobPreferences.user_id == user_id
+        ).first()
+
+        if preferences:
+            pref_data = {
+                "preferred_locations": preferences.preferred_locations,
+                "preferred_job_types": preferences.preferred_job_types,
+                "min_salary": preferences.min_salary,
+                "max_salary": preferences.max_salary,
+                "remote_ok": preferences.remote_ok
+            }
+            return sendSuccess(pref_data)
+        else:
+            return sendSuccess({
+                "preferred_locations": [],
+                "preferred_job_types": [],
+                "min_salary": None,
+                "max_salary": None,
+                "remote_ok": False
+            })
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+class JobPreferencesData(BaseModel):
+    preferred_locations: Optional[List[str]] = []
+    preferred_job_types: Optional[List[str]] = []
+    min_salary: Optional[float] = None
+    max_salary: Optional[float] = None
+    remote_ok: Optional[bool] = False
+
+
+@router.post("/job_preferences")
+async def update_job_preferences(request: Request, data: JobPreferencesData):
+    """Update user's job preferences"""
+    user_id = request.state.user["id"]
+
+    try:
+        existing_prefs = session.query(UserJobPreferences).filter(
+            UserJobPreferences.user_id == user_id
+        ).first()
+
+        if existing_prefs:
+            # Update existing preferences
+            existing_prefs.preferred_locations = data.preferred_locations
+            existing_prefs.preferred_job_types = data.preferred_job_types
+            existing_prefs.min_salary = data.min_salary
+            existing_prefs.max_salary = data.max_salary
+            existing_prefs.remote_ok = data.remote_ok
+        else:
+            # Create new preferences
+            new_prefs = UserJobPreferences(
+                user_id=user_id,
+                preferred_locations=data.preferred_locations,
+                preferred_job_types=data.preferred_job_types,
+                min_salary=data.min_salary,
+                max_salary=data.max_salary,
+                remote_ok=data.remote_ok
+            )
+            session.add(new_prefs)
+
+        session.commit()
+        return sendSuccess("Job preferences updated successfully")
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+# External Job Management
+@router.post("/scrape_jobs")
+async def scrape_external_jobs(request: Request):
+    """Scrape jobs from external sources and store in database"""
+    try:
+        from services.job_scraper import JobScraper
+
+        scraper = JobScraper()
+        scraped_jobs = scraper.scrape_all_sources(limit_per_source=10)
+
+        saved_count = 0
+        for job_data in scraped_jobs:
+            # Check if job already exists
+            existing_job = session.query(ExternalJob).filter(
+                ExternalJob.title == job_data['title'],
+                ExternalJob.company == job_data['company'],
+                ExternalJob.source == job_data['source']
+            ).first()
+
+            if not existing_job:
+                external_job = ExternalJob(
+                    title=job_data['title'],
+                    company=job_data['company'],
+                    location=job_data['location'],
+                    description=job_data['description'],
+                    skills=job_data['skills'],
+                    salary_min=job_data['salary_min'],
+                    salary_max=job_data['salary_max'],
+                    job_type=job_data['job_type'],
+                    apply_url=job_data['apply_url'],
+                    source=job_data['source'],
+                    posted_date=job_data['posted_date']
+                )
+                session.add(external_job)
+                saved_count += 1
+
+        session.commit()
+        return sendSuccess(f"Scraped and saved {saved_count} new jobs from {len(scraped_jobs)} total")
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+@router.get("/external_jobs")
+async def get_external_jobs(request: Request):
+    """Get all external jobs"""
+    limit_q = request.query_params.get("limit")
+    source_q = request.query_params.get("source")
+
+    limit = 50
+    if limit_q is not None:
+        limit = int(limit_q)
+
+    try:
+        query = session.query(ExternalJob).filter(
+            ExternalJob.is_active == True)
+
+        if source_q:
+            query = query.filter(ExternalJob.source == source_q)
+
+        external_jobs = query.order_by(
+            ExternalJob.scraped_date.desc()).limit(limit).all()
+
+        job_list = []
+        for job in external_jobs:
+            job_dict = {
+                "id": job.id,
+                "title": job.title,
+                "company": job.company,
+                "location": job.location,
+                "description": job.description,
+                "skills": job.skills,
+                "salary_min": job.salary_min,
+                "salary_max": job.salary_max,
+                "job_type": job.job_type,
+                "apply_url": job.apply_url,
+                "source": job.source,
+                "posted_date": job.posted_date.isoformat() if job.posted_date else None,
+                "scraped_date": job.scraped_date.isoformat(),
+                "is_enabled": job.is_enabled,
+                "is_active": job.is_active,
+
+            }
+            job_list.append(job_dict)
+
+        return sendSuccess(job_list)
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+@router.get("/recommend_external_jobs")
+async def recommend_external_jobs(request: Request):
+    """Get personalized external job recommendations"""
+    limit_q = request.query_params.get("limit")
+    limit = 20
+    if limit_q is not None:
+        limit = int(limit_q)
+
+    user_id = request.state.user["id"]
+
+    try:
+        # Get user's skills
+        user_skills = (
+            session.query(JobSeekerSkill)
+            .join(JobSeekerSkill.skill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        user_skill_names = [skill.skill.name for skill in user_skills]
+
+        # Get user's location from profile
+        user = session.query(User).join(
+            User.profile).filter(User.id == user_id).first()
+        user_location = user.profile.location if user and user.profile else None
+
+        # Get all active and enabled external jobs
+        external_jobs = session.query(ExternalJob).filter(
+            ExternalJob.is_active.is_(True),
+            ExternalJob.is_enabled.is_(True)
+        ).all()
+
+        job_recommendations = []
+
+        for job in external_jobs:
+            # Calculate match score using the same algorithm
+            match_score, skill_match_count, missing_skills = calculate_job_match_score(
+                user_skill_names, job.skills, job.location, user_location
+            )
+
+            if match_score > 0:  # Only include jobs with some match
+                job_data = {
+                    "id": job.id,
+                    "title": job.title,
+                    "company": job.company,
+                    "location": job.location,
+                    "description": job.description,
+                    "skills": job.skills,
+                    "salary_min": job.salary_min,
+                    "salary_max": job.salary_max,
+                    "job_type": job.job_type,
+                    "apply_url": job.apply_url,
+                    "source": job.source,
+                    "posted_date": job.posted_date.isoformat() if job.posted_date else None,
+                    "match_score": round(match_score, 2),
+                    "skill_match_count": skill_match_count,
+                    "missing_skills": missing_skills,
+                    "is_external": True
+                }
+                job_recommendations.append(job_data)
+
+        # Sort by match score and limit results
+        job_recommendations.sort(key=lambda x: x["match_score"], reverse=True)
+        job_recommendations = job_recommendations[:limit]
+
+        # Store external job matches for analytics
+        for job_rec in job_recommendations:
+            existing_match = session.query(ExternalJobMatch).filter(
+                ExternalJobMatch.user_id == user_id,
+                ExternalJobMatch.external_job_id == job_rec["id"]
+            ).first()
+
+            if existing_match:
+                existing_match.match_score = job_rec["match_score"]
+                existing_match.skill_match_count = job_rec["skill_match_count"]
+                existing_match.missing_skills = job_rec["missing_skills"]
+            else:
+                external_match = ExternalJobMatch(
+                    user_id=user_id,
+                    external_job_id=job_rec["id"],
+                    match_score=job_rec["match_score"],
+                    skill_match_count=job_rec["skill_match_count"],
+                    missing_skills=job_rec["missing_skills"]
+                )
+                session.add(external_match)
+
+        session.commit()
+        return sendSuccess(job_recommendations)
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+@router.get("/recommend_all_jobs")
+async def recommend_all_jobs(request: Request):
+    """Get combined recommendations from both internal and external jobs"""
+    limit_q = request.query_params.get("limit")
+    limit = 20
+    if limit_q is not None:
+        limit = int(limit_q)
+
+    try:
+        # Get internal job recommendations
+        internal_resp = await recommend_jobs(request)
+        internal_jobs = internal_resp.body.decode(
+        ) if hasattr(internal_resp, 'body') else []
+
+        # Get external job recommendations
+        external_resp = await recommend_external_jobs(request)
+        external_jobs = external_resp.body.decode(
+        ) if hasattr(external_resp, 'body') else []
+
+        # For simplicity, let's call the functions directly
+        user_id = request.state.user["id"]
+
+        # Get user skills
+        user_skills = (
+            session.query(JobSeekerSkill)
+            .join(JobSeekerSkill.skill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        user_skill_names = [skill.skill.name for skill in user_skills]
+
+        # Get user location
+        user = session.query(User).join(
+            User.profile).filter(User.id == user_id).first()
+        user_location = user.profile.location if user and user.profile else None
+
+        all_recommendations = []
+
+        # Add internal jobs
+        internal_jobs = session.query(Job).all()
+        for job in internal_jobs:
+            match_score, skill_match_count, missing_skills = calculate_job_match_score(
+                user_skill_names, job.skills, job.location, user_location
+            )
+
+            if match_score > 0:
+                job_data = {
+                    "id": job.id,
+                    "title": job.title,
+                    "company": job.company,
+                    "location": job.location,
+                    "description": job.description,
+                    "skills": job.skills,
+                    "salary": job.salary,
+                    "job_type": job.type,
+                    "apply_url": None,  # Internal jobs don't have external apply URLs
+                    "source": "Internal",
+                    "match_score": round(match_score, 2),
+                    "skill_match_count": skill_match_count,
+                    "missing_skills": missing_skills,
+                    "is_external": False
+                }
+                all_recommendations.append(job_data)
+
+        # Add external jobs (only enabled ones for mobile users)
+        external_jobs = session.query(ExternalJob).filter(
+            ExternalJob.is_active.is_(True),
+            ExternalJob.is_enabled.is_(True)
+        ).all()
+        for job in external_jobs:
+            match_score, skill_match_count, missing_skills = calculate_job_match_score(
+                user_skill_names, job.skills, job.location, user_location
+            )
+
+            # Include all external jobs, even with 0 match score
+            job_data = {
+                "id": job.id,
+                "title": job.title,
+                "company": job.company,
+                "location": job.location,
+                "description": job.description,
+                "skills": job.skills,
+                "salary_min": job.salary_min,
+                "salary_max": job.salary_max,
+                "job_type": job.job_type,
+                "apply_url": job.apply_url,
+                "source": job.source,
+                "match_score": round(match_score, 2),
+                "skill_match_count": skill_match_count,
+                "missing_skills": missing_skills,
+                "is_external": True
+            }
+            all_recommendations.append(job_data)
+
+        # Sort by match score and limit
+        all_recommendations.sort(key=lambda x: x["match_score"], reverse=True)
+        all_recommendations = all_recommendations[:limit]
+
+        return sendSuccess(all_recommendations)
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+# Admin functions for external job management
+@router.post("/external_jobs/{job_id}/enable")
+async def enable_external_job(job_id: int, request: Request):
+    """Enable an external job (admin only)"""
+    user_id = request.state.user["id"]
+
+    try:
+        # Check if user is admin
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user or user.role != "ADMIN":
+            return sendError("Unauthorized: Admin access required", 403)
+
+        external_job = session.query(ExternalJob).filter(
+            ExternalJob.id == job_id).first()
+        if not external_job:
+            return sendError("External job not found", 404)
+
+        external_job.is_enabled = True
+        session.commit()
+
+        return sendSuccess("External job enabled successfully")
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+@router.post("/external_jobs/{job_id}/disable")
+async def disable_external_job(job_id: int, request: Request):
+    """Disable an external job (admin only)"""
+    user_id = request.state.user["id"]
+
+    try:
+        # Check if user is admin
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user or user.role != "ADMIN":
+            return sendError("Unauthorized: Admin access required", 403)
+
+        external_job = session.query(ExternalJob).filter(
+            ExternalJob.id == job_id).first()
+        if not external_job:
+            return sendError("External job not found", 404)
+
+        external_job.is_enabled = False
+        session.commit()
+
+        return sendSuccess("External job disabled successfully")
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()
+
+
+class BulkJobAction(BaseModel):
+    job_ids: List[int]
+
+
+@router.post("/external_jobs/bulk_enable")
+async def bulk_enable_external_jobs(request: Request, data: BulkJobAction):
+    """Enable multiple external jobs (admin only)"""
+    user_id = request.state.user["id"]
+
+    try:
+        # Check if user is admin
+        user = session.query(User).filter(User.id == user_id).first()
+        if not user or user.role != "ADMIN":
+            return sendError("Unauthorized: Admin access required", 403)
+
+        if not data.job_ids:
+            return sendError("No job IDs provided")
+
+        updated_count = session.query(ExternalJob).filter(
+            ExternalJob.id.in_(data.job_ids)
+        ).update({"is_enabled": True}, synchronize_session=False)
+
+        session.commit()
+
+        return sendSuccess(f"Enabled {updated_count} external jobs")
+
+    except Exception as err:
+        session.rollback()
+        return sendError(str(err))
+    finally:
+        session.close()

@@ -1,0 +1,1008 @@
+2023-08-15 19:38:09,395 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2023-08-15 19:38:09,395 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-15 19:38:09,396 INFO sqlalchemy.engine.Engine select current_schema()
+2023-08-15 19:38:09,396 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-15 19:38:09,397 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2023-08-15 19:38:09,397 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-15 19:38:09,398 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-08-15 19:38:09,401 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,401 INFO sqlalchemy.engine.Engine [generated in 0.00023s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,403 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,403 INFO sqlalchemy.engine.Engine [cached since 0.002231s ago] {'table_name': 'employers', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,404 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,404 INFO sqlalchemy.engine.Engine [cached since 0.003004s ago] {'table_name': 'files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,405 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,405 INFO sqlalchemy.engine.Engine [cached since 0.003693s ago] {'table_name': 'skill_factors', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,405 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,406 INFO sqlalchemy.engine.Engine [cached since 0.0044s ago] {'table_name': 'skills', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,406 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,406 INFO sqlalchemy.engine.Engine [cached since 0.005129s ago] {'table_name': 'job_seeker_skills', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,407 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,407 INFO sqlalchemy.engine.Engine [cached since 0.00578s ago] {'table_name': 'experiences', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,407 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,408 INFO sqlalchemy.engine.Engine [cached since 0.006397s ago] {'table_name': 'educations', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,408 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,408 INFO sqlalchemy.engine.Engine [cached since 0.007014s ago] {'table_name': 'job_seekers', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,409 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,409 INFO sqlalchemy.engine.Engine [cached since 0.007631s ago] {'table_name': 'user_resume', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,409 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,409 INFO sqlalchemy.engine.Engine [cached since 0.008226s ago] {'table_name': 'courses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,410 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,410 INFO sqlalchemy.engine.Engine [cached since 0.008854s ago] {'table_name': 'user_courses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,411 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-15 19:38:09,411 INFO sqlalchemy.engine.Engine [cached since 0.009511s ago] {'table_name': 'sys_admin_roles', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-15 19:38:09,411 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Started server process [64537]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+WARNING:  Invalid HTTP request received.
+INFO:     41.66.203.14:30625 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     41.66.203.53:15370 - "GET / HTTP/1.1" 200 OK
+INFO:     128.1.248.42:54196 - "GET / HTTP/1.1" 200 OK
+user is ==  2
+2023-08-15 21:06:21,535 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-08-15 21:06:21,537 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:06:21,538 INFO sqlalchemy.engine.Engine [generated in 0.00027s] {'id_1': 2, 'param_1': 1}
+2023-08-15 21:06:21,542 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-15 21:06:21,542 INFO sqlalchemy.engine.Engine [generated in 0.00022s] {'user_id_1': 2}
+2023-08-15 21:06:21,545 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-15 21:06:21,545 INFO sqlalchemy.engine.Engine [generated in 0.00023s] {'user_id_1': 2}
+2023-08-15 21:06:21,548 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE %(param_1)s = educations.user_id
+2023-08-15 21:06:21,548 INFO sqlalchemy.engine.Engine [generated in 0.00020s] {'param_1': 2}
+2023-08-15 21:06:21,551 INFO sqlalchemy.engine.Engine SELECT job_seekers.about AS job_seekers_about, job_seekers.location AS job_seekers_location, job_seekers.education AS job_seekers_education, job_seekers.portfolio AS job_seekers_portfolio, job_seekers.languages AS job_seekers_languages, job_seekers.id AS job_seekers_id, job_seekers.created AS job_seekers_created, job_seekers.updated AS job_seekers_updated 
+FROM job_seekers 
+WHERE job_seekers.id = %(pk_1)s
+2023-08-15 21:06:21,551 INFO sqlalchemy.engine.Engine [generated in 0.00022s] {'pk_1': 2}
+2023-08-15 21:06:21,554 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE %(param_1)s = experiences.user_id
+2023-08-15 21:06:21,554 INFO sqlalchemy.engine.Engine [generated in 0.00024s] {'param_1': 2}
+2023-08-15 21:06:21,556 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:06:21,556 INFO sqlalchemy.engine.Engine [generated in 0.00017s] {'user_id_1': 2}
+2023-08-15 21:06:21,559 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-15 21:06:21,559 INFO sqlalchemy.engine.Engine [generated in 0.00016s] {'pk_1': 181}
+2023-08-15 21:06:21,561 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-15 21:06:21,561 INFO sqlalchemy.engine.Engine [generated in 0.00021s] {'user_id_1': 2}
+INFO:     154.160.26.10:54966 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-15 21:06:24,758 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:06:24,758 INFO sqlalchemy.engine.Engine [cached since 3.202s ago] {'user_id_1': 2}
+2023-08-15 21:06:24,760 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-15 21:06:24,760 INFO sqlalchemy.engine.Engine [cached since 3.201s ago] {'pk_1': 181}
+INFO:     154.160.26.10:54966 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+user is ==  2
+2023-08-15 21:06:25,199 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:06:25,199 INFO sqlalchemy.engine.Engine [cached since 3.662s ago] {'id_1': 2, 'param_1': 1}
+2023-08-15 21:06:25,201 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-15 21:06:25,201 INFO sqlalchemy.engine.Engine [cached since 3.659s ago] {'user_id_1': 2}
+2023-08-15 21:06:25,202 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-15 21:06:25,202 INFO sqlalchemy.engine.Engine [cached since 3.657s ago] {'user_id_1': 2}
+2023-08-15 21:06:25,203 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:06:25,203 INFO sqlalchemy.engine.Engine [cached since 3.647s ago] {'user_id_1': 2}
+2023-08-15 21:06:25,204 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-15 21:06:25,204 INFO sqlalchemy.engine.Engine [cached since 3.646s ago] {'pk_1': 181}
+2023-08-15 21:06:25,205 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-15 21:06:25,205 INFO sqlalchemy.engine.Engine [cached since 3.645s ago] {'user_id_1': 2}
+INFO:     154.160.26.10:54967 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-15 21:06:25,408 INFO sqlalchemy.engine.Engine SELECT files.id AS files_id, files.data AS files_data, files.filename AS files_filename, files.type AS files_type, files.sha AS files_sha, files.created AS files_created, files.updated AS files_updated 
+FROM files 
+WHERE files.filename = %(filename_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:06:25,408 INFO sqlalchemy.engine.Engine [generated in 0.00038s] {'filename_1': 'f4f85352-62a0-4c7e-b67b-18056123bff8.jpg', 'param_1': 1}
+INFO:     154.160.26.10:54968 - "GET /user/file/f4f85352-62a0-4c7e-b67b-18056123bff8.jpg HTTP/1.1" 200 OK
+2023-08-15 21:06:42,490 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.lower ILIKE %(lower_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:06:42,490 INFO sqlalchemy.engine.Engine [generated in 0.00033s] {'lower_1': '%html5%', 'param_1': 50}
+INFO:     154.160.26.10:54971 - "GET /user/skills?q=HTML5 HTTP/1.1" 200 OK
+2023-08-15 21:07:03,631 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:07:03,631 INFO sqlalchemy.engine.Engine [generated in 0.00037s] {'user_id_1': 2}
+2023-08-15 21:07:03,636 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(id_1)s) AS anon_1
+2023-08-15 21:07:03,637 INFO sqlalchemy.engine.Engine [generated in 0.00027s] {'id_1': 1007}
+adding  1007  to  2
+2023-08-15 21:07:03,640 INFO sqlalchemy.engine.Engine INSERT INTO job_seeker_skills (skill_id, user_id, created, updated) VALUES (%(skill_id)s, %(user_id)s, %(created)s, %(updated)s) RETURNING job_seeker_skills.id
+2023-08-15 21:07:03,640 INFO sqlalchemy.engine.Engine [generated in 0.00023s] {'skill_id': 1007, 'user_id': 2, 'created': datetime.datetime(2023, 8, 15, 21, 7, 3, 640164), 'updated': None}
+2023-08-15 21:07:03,642 INFO sqlalchemy.engine.Engine DELETE FROM job_seeker_skills WHERE job_seeker_skills.id = %(id)s
+2023-08-15 21:07:03,642 INFO sqlalchemy.engine.Engine [generated in 0.00019s] {'id': 56}
+2023-08-15 21:07:03,644 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     154.160.26.10:54974 - "POST /user/skill HTTP/1.1" 200 OK
+user is ==  2
+2023-08-15 21:07:04,470 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-08-15 21:07:04,470 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:07:04,471 INFO sqlalchemy.engine.Engine [cached since 42.93s ago] {'id_1': 2, 'param_1': 1}
+2023-08-15 21:07:04,473 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-15 21:07:04,473 INFO sqlalchemy.engine.Engine [cached since 42.93s ago] {'user_id_1': 2}
+2023-08-15 21:07:04,474 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-15 21:07:04,474 INFO sqlalchemy.engine.Engine [cached since 42.93s ago] {'user_id_1': 2}
+2023-08-15 21:07:04,475 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE %(param_1)s = educations.user_id
+2023-08-15 21:07:04,475 INFO sqlalchemy.engine.Engine [cached since 42.93s ago] {'param_1': 2}
+2023-08-15 21:07:04,477 INFO sqlalchemy.engine.Engine SELECT job_seekers.about AS job_seekers_about, job_seekers.location AS job_seekers_location, job_seekers.education AS job_seekers_education, job_seekers.portfolio AS job_seekers_portfolio, job_seekers.languages AS job_seekers_languages, job_seekers.id AS job_seekers_id, job_seekers.created AS job_seekers_created, job_seekers.updated AS job_seekers_updated 
+FROM job_seekers 
+WHERE job_seekers.id = %(pk_1)s
+2023-08-15 21:07:04,477 INFO sqlalchemy.engine.Engine [cached since 42.93s ago] {'pk_1': 2}
+2023-08-15 21:07:04,478 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE %(param_1)s = experiences.user_id
+2023-08-15 21:07:04,478 INFO sqlalchemy.engine.Engine [cached since 42.92s ago] {'param_1': 2}
+2023-08-15 21:07:04,479 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:07:04,479 INFO sqlalchemy.engine.Engine [cached since 42.92s ago] {'user_id_1': 2}
+2023-08-15 21:07:04,480 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-15 21:07:04,480 INFO sqlalchemy.engine.Engine [cached since 42.92s ago] {'pk_1': 1007}
+2023-08-15 21:07:04,481 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-15 21:07:04,481 INFO sqlalchemy.engine.Engine [cached since 42.92s ago] {'user_id_1': 2}
+INFO:     154.160.26.10:54974 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-15 21:07:09,170 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:07:09,170 INFO sqlalchemy.engine.Engine [cached since 47.61s ago] {'user_id_1': 2}
+INFO:     154.160.26.10:54975 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+2023-08-15 21:11:41,193 INFO sqlalchemy.engine.Engine SELECT files.id AS files_id, files.data AS files_data, files.filename AS files_filename, files.type AS files_type, files.sha AS files_sha, files.created AS files_created, files.updated AS files_updated 
+FROM files 
+WHERE files.filename = %(filename_1)s 
+ LIMIT %(param_1)s
+2023-08-15 21:11:41,193 INFO sqlalchemy.engine.Engine [cached since 315.8s ago] {'filename_1': 'f4f85352-62a0-4c7e-b67b-18056123bff8.jpg', 'param_1': 1}
+INFO:     41.215.171.113:34626 - "GET /user/file/f4f85352-62a0-4c7e-b67b-18056123bff8.jpg HTTP/1.1" 200 OK
+2023-08-15 21:11:41,300 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-15 21:11:41,300 INFO sqlalchemy.engine.Engine [cached since 319.7s ago] {'user_id_1': 2}
+2023-08-15 21:11:41,302 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-15 21:11:41,302 INFO sqlalchemy.engine.Engine [cached since 319.7s ago] {'pk_1': 1007}
+INFO:     41.215.171.113:34644 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     46.101.132.201:36776 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     205.210.31.197:52568 - "GET / HTTP/1.0" 200 OK
+INFO:     192.241.235.11:43934 - "GET / HTTP/1.1" 200 OK
+INFO:     192.241.235.11:55182 - "GET / HTTP/1.1" 200 OK
+INFO:     198.235.24.37:58154 - "GET / HTTP/1.1" 200 OK
+INFO:     205.210.31.8:60894 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     84.54.51.124:42344 - "GET / HTTP/1.1" 200 OK
+INFO:     84.54.51.124:43888 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     84.54.51.124:45120 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:     84.54.51.124:46376 - "GET /sitemap.xml HTTP/1.1" 404 Not Found
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.105:52826 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     159.65.90.172:52172 - "GET / HTTP/1.1" 200 OK
+INFO:     205.210.31.252:59866 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     87.236.176.229:36519 - "GET / HTTP/1.1" 200 OK
+INFO:     125.212.235.211:52658 - "GET /phpMyAdmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:34312 - "GET /phpmyadmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:38700 - "GET /phpMyAdmin-2.11.4/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:46940 - "GET /phpMyAdmin-2.11.3/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53908 - "GET /phpMyAdmin-2.10.0.2/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54090 - "GET /phpMyAdmin-2.10.3/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54976 - "GET /phpMyAdmin-2.8.0.2/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:38750 - "GET /phpMyAdmin-2.10.2/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:42666 - "GET /phpMyAdmin-2.11.9.2/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:38908 - "GET /phpMyAdmin-2.11.1.2/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53784 - "GET /pma/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53976 - "GET /phpMyAdmin3/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54224 - "GET /myadmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:51886 - "GET /MyAdmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:59244 - "GET /PHPMYADMIN/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53966 - "GET /phpMyAdmin-2.5.5-pl1/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54254 - "GET /phpMyAdmin-2.5.5/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54448 - "GET /phpMyAdmin-2.5.4/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54718 - "GET /phpMyAdmin-2.5.7-pl1/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:54976 - "GET /admin/pma/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:48248 - "GET /web/phpMyAdmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:35718 - "GET /webadmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:36064 - "GET /admin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:36420 - "GET /dbadmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:36696 - "GET /mysql/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:55020 - "GET /phpma/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:60790 - "GET /websql/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:39696 - "GET /_phpMyAdmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:39970 - "GET /php/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:40260 - "GET /admin/phpmyadmin/scripts/setup.txt HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53590 - "GET /sqlmanager/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:60746 - "GET /mysqlmanager/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:41794 - "GET /php-myadmin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53022 - "GET /phpmy-admin/scripts/setup.php HTTP/1.0" 404 Not Found
+INFO:     125.212.235.211:53328 - "GET /mysql-admin/scripts/setup.php HTTP/1.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     192.210.207.202:49058 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     34.140.248.32:51380 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     205.210.31.97:63256 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     128.14.224.234:36000 - "GET / HTTP/1.1" 200 OK
+INFO:     128.14.224.234:40606 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     128.14.224.234:40804 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:     128.14.224.234:41010 - "GET /sitemap.xml HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     107.155.48.224:55478 - "GET / HTTP/1.1" 200 OK
+INFO:     107.155.48.224:59730 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     107.155.48.224:32898 - "GET /robots.txt HTTP/1.1" 404 Not Found
+INFO:     107.155.48.224:34388 - "GET /sitemap.xml HTTP/1.1" 404 Not Found
+INFO:     167.94.138.35:47282 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.138.35:59184 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.80:63446 - "GET / HTTP/1.1" 200 OK
+INFO:     192.155.88.231:48037 - "GET / HTTP/1.1" 200 OK
+INFO:     45.79.172.21:44272 - "GET / HTTP/1.1" 200 OK
+INFO:     167.248.133.50:35836 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     167.248.133.50:56016 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     87.236.176.249:54101 - "GET / HTTP/1.1" 200 OK
+INFO:     138.68.208.45:59002 - "GET / HTTP/1.1" 200 OK
+INFO:     138.68.208.45:46058 - "GET / HTTP/1.1" 200 OK
+INFO:     198.235.24.119:49515 - "GET / HTTP/1.0" 200 OK
+INFO:     198.235.24.81:52633 - "GET / HTTP/1.0" 200 OK
+Signature has expired
+INFO:     41.215.169.53:51964 - "GET /user/ HTTP/1.1" 401 Unauthorized
+Signature has expired
+INFO:     41.215.169.53:51965 - "GET /user/ HTTP/1.1" 401 Unauthorized
+2023-08-17 07:33:02,541 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-17 07:33:02,541 INFO sqlalchemy.engine.Engine [generated in 0.00029s] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.169.53:54914 - "POST /auth/login HTTP/1.1" 200 OK
+user is ==  2
+2023-08-17 07:33:03,382 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-17 07:33:03,382 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'id_1': 2, 'param_1': 1}
+2023-08-17 07:33:03,384 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-17 07:33:03,384 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+2023-08-17 07:33:03,385 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-17 07:33:03,385 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+2023-08-17 07:33:03,386 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 07:33:03,387 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+2023-08-17 07:33:03,388 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-17 07:33:03,388 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'pk_1': 1007}
+2023-08-17 07:33:03,388 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-17 07:33:03,389 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+INFO:     41.215.169.53:54914 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-17 07:33:04,552 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 07:33:04,552 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+INFO:     41.215.169.53:54914 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+2023-08-17 07:33:04,948 INFO sqlalchemy.engine.Engine SELECT files.id AS files_id, files.data AS files_data, files.filename AS files_filename, files.type AS files_type, files.sha AS files_sha, files.created AS files_created, files.updated AS files_updated 
+FROM files 
+WHERE files.filename = %(filename_1)s 
+ LIMIT %(param_1)s
+2023-08-17 07:33:04,948 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'filename_1': 'f4f85352-62a0-4c7e-b67b-18056123bff8.jpg', 'param_1': 1}
+INFO:     41.215.169.53:55143 - "GET /user/file/f4f85352-62a0-4c7e-b67b-18056123bff8.jpg HTTP/1.1" 200 OK
+2023-08-17 07:33:28,115 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 07:33:28,115 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'user_id_1': 2}
+2023-08-17 07:33:28,118 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-17 07:33:28,118 INFO sqlalchemy.engine.Engine [cached since 1.24e+05s ago] {'pk_1': 1007}
+INFO:     41.215.169.53:56864 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+2023-08-17 07:38:59,167 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 07:38:59,167 INFO sqlalchemy.engine.Engine [cached since 1.244e+05s ago] {'user_id_1': 2}
+2023-08-17 07:38:59,169 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-17 07:38:59,169 INFO sqlalchemy.engine.Engine [cached since 1.244e+05s ago] {'pk_1': 1007}
+INFO:     41.215.169.53:56629 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+2023-08-17 07:40:35,732 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.lower ILIKE %(lower_1)s 
+ LIMIT %(param_1)s
+2023-08-17 07:40:35,732 INFO sqlalchemy.engine.Engine [cached since 1.244e+05s ago] {'lower_1': '%js%', 'param_1': 50}
+INFO:     41.215.169.53:36424 - "GET /user/skills?q=js HTTP/1.1" 200 OK
+INFO:     185.180.140.7:51146 - "GET / HTTP/1.1" 200 OK
+2023-08-17 08:20:43,280 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.lower ILIKE %(lower_1)s 
+ LIMIT %(param_1)s
+2023-08-17 08:20:43,280 INFO sqlalchemy.engine.Engine [cached since 1.268e+05s ago] {'lower_1': '%js%', 'param_1': 50}
+INFO:     41.215.169.53:33063 - "GET /user/skills?q=js HTTP/1.1" 200 OK
+2023-08-17 08:35:17,448 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-17 08:35:17,448 INFO sqlalchemy.engine.Engine [cached since 3735s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.173.112:48657 - "POST /auth/login HTTP/1.1" 200 OK
+user is ==  2
+2023-08-17 08:35:21,477 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-17 08:35:21,477 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'id_1': 2, 'param_1': 1}
+2023-08-17 08:35:21,479 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-17 08:35:21,479 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'user_id_1': 2}
+2023-08-17 08:35:21,480 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-17 08:35:21,480 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'user_id_1': 2}
+2023-08-17 08:35:21,481 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 08:35:21,481 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'user_id_1': 2}
+2023-08-17 08:35:21,482 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-17 08:35:21,482 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'pk_1': 1007}
+2023-08-17 08:35:21,483 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-17 08:35:21,483 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'user_id_1': 2}
+INFO:     41.215.173.112:48657 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-17 08:35:25,717 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 08:35:25,718 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'user_id_1': 2}
+INFO:     41.215.173.112:48657 - "GET /user/recommend_skills HTTP/1.1" 200 OK
+2023-08-17 08:35:25,939 INFO sqlalchemy.engine.Engine SELECT files.id AS files_id, files.data AS files_data, files.filename AS files_filename, files.type AS files_type, files.sha AS files_sha, files.created AS files_created, files.updated AS files_updated 
+FROM files 
+WHERE files.filename = %(filename_1)s 
+ LIMIT %(param_1)s
+2023-08-17 08:35:25,939 INFO sqlalchemy.engine.Engine [cached since 1.277e+05s ago] {'filename_1': 'f4f85352-62a0-4c7e-b67b-18056123bff8.jpg', 'param_1': 1}
+INFO:     41.215.173.112:49677 - "GET /user/file/f4f85352-62a0-4c7e-b67b-18056123bff8.jpg HTTP/1.1" 200 OK
+2023-08-17 08:35:58,337 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.lower ILIKE %(lower_1)s 
+ LIMIT %(param_1)s
+2023-08-17 08:35:58,337 INFO sqlalchemy.engine.Engine [cached since 1.278e+05s ago] {'lower_1': '%java%', 'param_1': 50}
+INFO:     41.215.173.112:52733 - "GET /user/skills?q=java HTTP/1.1" 200 OK
+2023-08-17 08:59:13,736 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-17 08:59:13,737 INFO sqlalchemy.engine.Engine [cached since 1.291e+05s ago] {'user_id_1': 2}
+2023-08-17 08:59:13,738 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(id_1)s) AS anon_1
+2023-08-17 08:59:13,738 INFO sqlalchemy.engine.Engine [cached since 1.291e+05s ago] {'id_1': 180}
+adding  180  to  2
+2023-08-17 08:59:13,740 INFO sqlalchemy.engine.Engine INSERT INTO job_seeker_skills (skill_id, user_id, created, updated) VALUES (%(skill_id)s, %(user_id)s, %(created)s, %(updated)s) RETURNING job_seeker_skills.id
+2023-08-17 08:59:13,740 INFO sqlalchemy.engine.Engine [cached since 1.291e+05s ago] {'skill_id': 180, 'user_id': 2, 'created': datetime.datetime(2023, 8, 17, 8, 59, 13, 740480), 'updated': None}
+2023-08-17 08:59:13,741 INFO sqlalchemy.engine.Engine DELETE FROM job_seeker_skills WHERE job_seeker_skills.id = %(id)s
+2023-08-17 08:59:13,741 INFO sqlalchemy.engine.Engine [cached since 1.291e+05s ago] {'id': 57}
+2023-08-17 08:59:13,742 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     41.215.173.112:35110 - "POST /user/skill HTTP/1.1" 200 OK
+INFO:     185.180.143.18:48640 - "GET / HTTP/1.1" 200 OK
+INFO:     128.14.209.34:60998 - "GET / HTTP/1.1" 200 OK
+INFO:     185.180.140.9:60846 - "GET / HTTP/1.1" 200 OK
+INFO:     185.180.140.9:37410 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.174:49552 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     173.239.214.186:63313 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:59933 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:53740 - "POST /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:58232 - "POST /vendor/phpunit/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53569 - "POST /vendor/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59322 - "POST /vendor/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51271 - "POST /phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53394 - "POST /phpunit/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51262 - "POST /phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:58322 - "POST /phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53421 - "POST /lib/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49787 - "POST /lib/phpunit/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59568 - "POST /lib/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63243 - "POST /lib/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53018 - "POST /admin/ckeditor/plugins/ajaxplorer/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52895 - "POST /admin/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63160 - "POST /api/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53401 - "POST /api/vendor/phpunit/phpunit/src/Util/PHP/Template/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63308 - "POST /lab/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:65307 - "POST /laravel_web/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51714 - "POST /laravel/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:61734 - "POST /laravelao/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49432 - "POST /lib/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:58223 - "POST /lib/phpunit/phpunit/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53310 - "POST /lib/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49729 - "POST /lib/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:58263 - "POST /libraries/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49625 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:49758 - "GET /.DS_Store HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53263 - "GET /.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64430 - "POST /.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63854 - "GET /.env.save HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63569 - "POST /.env.save HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51546 - "GET /.env.old HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53279 - "POST /.env.old HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49331 - "GET /.env.prod HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64630 - "POST /.env.prod HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64377 - "GET /.env.production HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64530 - "POST /.env.production HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64903 - "GET /.env.development HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63778 - "POST /.env.development HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51186 - "GET /laravel/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59654 - "POST /laravel/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63739 - "GET /admin-app/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62585 - "POST /admin-app/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62089 - "GET /api/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62012 - "POST /api/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62172 - "GET /app/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51385 - "POST /app/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62448 - "GET /development/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51428 - "POST /development/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63038 - "GET /apps/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62203 - "POST /apps/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64828 - "GET /cp/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:61978 - "POST /cp/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:50205 - "GET /private/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62918 - "POST /private/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53076 - "GET /system/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55097 - "POST /system/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62798 - "GET /docker/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53061 - "POST /docker/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54279 - "GET /cms/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54394 - "POST /cms/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62740 - "GET /script/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51433 - "POST /script/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62814 - "GET /live_env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54545 - "POST /live_env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:65424 - "GET /application/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:50157 - "POST /application/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54439 - "GET /.env.project HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54562 - "POST /.env.project HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62150 - "GET /.env.dist HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59036 - "POST /.env.dist HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54079 - "GET /back/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55110 - "POST /back/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51333 - "GET /core/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59069 - "POST /core/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62079 - "GET /docker/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54480 - "POST /docker/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51227 - "GET /fedex/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54302 - "POST /fedex/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:62863 - "GET /local/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55096 - "POST /local/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59065 - "GET /rest/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55028 - "POST /rest/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63417 - "GET /shared/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63498 - "POST /shared/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55033 - "GET /sources/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54869 - "POST /sources/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55840 - "GET /enviroments/.env.production HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55610 - "POST /enviroments/.env.production HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54910 - "GET /enviroments/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:55423 - "POST /enviroments/.env HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54914 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:58969 - "POST / HTTP/1.1" 405 Method Not Allowed
+INFO:     173.239.214.186:56528 - "GET /frontend_dev.php/%24 HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52392 - "GET /debug/default/view?panel=config/frontend_dev.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:49674 - "GET /debug/default/view?panel=config HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64422 - "GET /debug/default/view.html HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54066 - "GET /debug/default/view HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64448 - "GET /frontend/web/debug/default/view HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64594 - "GET /web/debug/default/view HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53812 - "GET /sapi/debug/default/view HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51350 - "GET /AwsConfig.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:50151 - "GET /awsconfig.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52809 - "GET /aws.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54219 - "GET /conf.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51212 - "GET /env.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54286 - "GET /.vscode/sftp.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59091 - "GET /.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:61399 - "GET /db.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:50330 - "GET /sendgrid.json HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:54293 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:64173 - "GET /_profiler/phpinfo HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52610 - "GET /phpinfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64337 - "GET /info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:64483 - "GET /?phpinfo=1 HTTP/1.1" 200 OK
+INFO:     173.239.214.186:50271 - "GET /tool/view/phpinfo.view.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52320 - "GET /phpinfo HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:53736 - "GET /symfony/public/_profiler/phpinfo HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:63627 - "GET /html/phpinfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52173 - "GET /?phpinfo=-1 HTTP/1.1" 200 OK
+INFO:     173.239.214.186:52289 - "GET /__info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:51891 - "GET /_info-backoffice.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:61231 - "GET /_info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:56060 - "GET /_phpinf.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:52190 - "GET /_phpinfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:57105 - "GET /_poopinfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:56071 - "GET /.__info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:57841 - "GET /.info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:61079 - "GET /0.0_phpinfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:59785 - "GET /00_server_info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:56702 - "GET /02-info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:60603 - "GET /1_1_PhpInfo.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:58145 - "GET /5info.php HTTP/1.1" 404 Not Found
+INFO:     173.239.214.186:57559 - "GET / HTTP/1.1" 200 OK
+INFO:     173.239.214.186:57302 - "GET /api/index.php/v1/config/application?public=true HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.158:60172 - "GET / HTTP/1.1" 200 OK
+INFO:     207.90.244.2:39468 - "GET / HTTP/1.1" 200 OK
+INFO:     207.90.244.2:39474 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     45.15.17.67:32544 - "GET / HTTP/1.1" 200 OK
+INFO:     45.15.17.67:32544 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     45.15.17.67:28166 - "GET / HTTP/1.1" 200 OK
+INFO:     45.15.17.67:28166 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     45.15.17.67:48812 - "GET / HTTP/1.1" 200 OK
+INFO:     45.15.17.67:48812 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     205.210.31.164:49228 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     159.89.144.242:43394 - "GET / HTTP/1.1" 200 OK
+INFO:     13.57.33.140:54574 - "GET / HTTP/1.1" 200 OK
+INFO:     52.53.208.34:42870 - "GET / HTTP/1.1" 200 OK
+INFO:     205.210.31.104:57370 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     174.138.61.44:57050 - "GET / HTTP/1.1" 200 OK
+make: *** [Makefile:6: run-server] Killed
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3293, in raw_connection
+    return self.pool.connect()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 1268, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 716, in checkout
+    rec = pool._do_get()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/impl.py", line 168, in _do_get
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/langhelpers.py", line 147, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/impl.py", line 166, in _do_get
+    return self._create_connection()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 678, in __init__
+    self.__connect()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 902, in __connect
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/langhelpers.py", line 147, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+  File "/usr/local/lib/python3.10/dist-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication failed for user "postgres"
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/bin/uvicorn", line 8, in <module>
+    sys.exit(main())
+  File "/usr/local/lib/python3.10/dist-packages/click/core.py", line 1130, in __call__
+    return self.main(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/click/core.py", line 1055, in main
+    rv = self.invoke(ctx)
+  File "/usr/local/lib/python3.10/dist-packages/click/core.py", line 1404, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/usr/local/lib/python3.10/dist-packages/click/core.py", line 760, in invoke
+    return __callback(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/main.py", line 410, in main
+    run(
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/main.py", line 578, in run
+    server.run()
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 61, in run
+    return asyncio.run(self.serve(sockets=sockets))
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/server.py", line 68, in serve
+    config.load()
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/config.py", line 473, in load
+    self.loaded_app = import_from_string(self.app)
+  File "/usr/local/lib/python3.10/dist-packages/uvicorn/importer.py", line 21, in import_from_string
+    module = importlib.import_module(module_str)
+  File "/usr/lib/python3.10/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1050, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 883, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/root/dev/nat/skill_sage/main.py", line 10, in <module>
+    initDB()
+  File "/root/dev/nat/skill_sage/db/connection.py", line 20, in initDB
+    Base.metadata.create_all(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5796, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3243, in _run_ddl_visitor
+    with self.begin() as conn:
+  File "/usr/lib/python3.10/contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3233, in begin
+    with self.connect() as conn:
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3269, in connect
+    return self._connection_cls(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 147, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2431, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 145, in __init__
+    self._dbapi_connection = engine.raw_connection()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3293, in raw_connection
+    return self.pool.connect()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 452, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 1268, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 716, in checkout
+    rec = pool._do_get()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/impl.py", line 168, in _do_get
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/langhelpers.py", line 147, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/impl.py", line 166, in _do_get
+    return self._create_connection()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 393, in _create_connection
+    return _ConnectionRecord(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 678, in __init__
+    self.__connect()
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 902, in __connect
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/langhelpers.py", line 147, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/pool/base.py", line 898, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/create.py", line 637, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/default.py", line 616, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)
+  File "/usr/local/lib/python3.10/dist-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication failed for user "postgres"
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+make: *** [Makefile:6: run-server] Error 1
+2023-08-18 09:40:17,174 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2023-08-18 09:40:17,174 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-18 09:40:17,176 INFO sqlalchemy.engine.Engine select current_schema()
+2023-08-18 09:40:17,176 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-18 09:40:17,177 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2023-08-18 09:40:17,177 INFO sqlalchemy.engine.Engine [raw sql] {}
+2023-08-18 09:40:17,178 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-08-18 09:40:17,183 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,183 INFO sqlalchemy.engine.Engine [generated in 0.00036s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,186 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,186 INFO sqlalchemy.engine.Engine [cached since 0.00323s ago] {'table_name': 'employers', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,188 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,188 INFO sqlalchemy.engine.Engine [cached since 0.004853s ago] {'table_name': 'files', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,189 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,189 INFO sqlalchemy.engine.Engine [cached since 0.006137s ago] {'table_name': 'skill_factors', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,190 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,190 INFO sqlalchemy.engine.Engine [cached since 0.007149s ago] {'table_name': 'skills', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,191 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,191 INFO sqlalchemy.engine.Engine [cached since 0.008398s ago] {'table_name': 'job_seeker_skills', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,192 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,192 INFO sqlalchemy.engine.Engine [cached since 0.0095s ago] {'table_name': 'experiences', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,193 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,193 INFO sqlalchemy.engine.Engine [cached since 0.01066s ago] {'table_name': 'educations', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,195 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,195 INFO sqlalchemy.engine.Engine [cached since 0.01177s ago] {'table_name': 'job_seekers', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,196 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,196 INFO sqlalchemy.engine.Engine [cached since 0.01286s ago] {'table_name': 'user_resume', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,197 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,197 INFO sqlalchemy.engine.Engine [cached since 0.01383s ago] {'table_name': 'courses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,198 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,198 INFO sqlalchemy.engine.Engine [cached since 0.01487s ago] {'table_name': 'user_courses', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,199 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2023-08-18 09:40:17,199 INFO sqlalchemy.engine.Engine [cached since 0.01595s ago] {'table_name': 'sys_admin_roles', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2023-08-18 09:40:17,200 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     Started server process [150636]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+INFO:     87.236.176.17:36875 - "GET / HTTP/1.1" 200 OK
+INFO:     41.66.203.237:30745 - "GET / HTTP/1.1" 200 OK
+Signature has expired
+INFO:     41.215.171.56:58317 - "GET /user/ HTTP/1.1" 401 Unauthorized
+Signature has expired
+INFO:     41.215.171.56:58323 - "GET /user/ HTTP/1.1" 401 Unauthorized
+2023-08-18 11:38:16,758 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2023-08-18 11:38:16,762 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:38:16,762 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+2023-08-18 11:38:17,037 INFO sqlalchemy.engine.Engine SELECT job_seekers.about AS job_seekers_about, job_seekers.location AS job_seekers_location, job_seekers.education AS job_seekers_education, job_seekers.portfolio AS job_seekers_portfolio, job_seekers.languages AS job_seekers_languages, job_seekers.id AS job_seekers_id, job_seekers.created AS job_seekers_created, job_seekers.updated AS job_seekers_updated 
+FROM job_seekers 
+WHERE job_seekers.id = %(pk_1)s
+2023-08-18 11:38:17,037 INFO sqlalchemy.engine.Engine [generated in 0.00028s] {'pk_1': 2}
+INFO:     41.215.171.56:61214 - "POST /auth/login HTTP/1.1" 200 OK
+user is ==  2
+2023-08-18 11:38:17,597 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:38:17,598 INFO sqlalchemy.engine.Engine [generated in 0.00028s] {'id_1': 2, 'param_1': 1}
+2023-08-18 11:38:17,601 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE educations.user_id = %(user_id_1)s
+2023-08-18 11:38:17,601 INFO sqlalchemy.engine.Engine [generated in 0.00024s] {'user_id_1': 2}
+2023-08-18 11:38:17,604 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE experiences.user_id = %(user_id_1)s
+2023-08-18 11:38:17,604 INFO sqlalchemy.engine.Engine [generated in 0.00024s] {'user_id_1': 2}
+2023-08-18 11:38:17,607 INFO sqlalchemy.engine.Engine SELECT educations.user_id AS educations_user_id, educations.program AS educations_program, educations.institution AS educations_institution, educations.start_date AS educations_start_date, educations.end_date AS educations_end_date, educations.has_completed AS educations_has_completed, educations.id AS educations_id, educations.created AS educations_created, educations.updated AS educations_updated 
+FROM educations 
+WHERE %(param_1)s = educations.user_id
+2023-08-18 11:38:17,608 INFO sqlalchemy.engine.Engine [generated in 0.00023s] {'param_1': 2}
+2023-08-18 11:38:17,610 INFO sqlalchemy.engine.Engine SELECT experiences.user_id AS experiences_user_id, experiences.company_name AS experiences_company_name, experiences.job_title AS experiences_job_title, experiences.start_date AS experiences_start_date, experiences.end_date AS experiences_end_date, experiences.is_remote AS experiences_is_remote, experiences.has_completed AS experiences_has_completed, experiences.tasks AS experiences_tasks, experiences.id AS experiences_id, experiences.created AS experiences_created, experiences.updated AS experiences_updated 
+FROM experiences 
+WHERE %(param_1)s = experiences.user_id
+2023-08-18 11:38:17,610 INFO sqlalchemy.engine.Engine [generated in 0.00019s] {'param_1': 2}
+2023-08-18 11:38:17,612 INFO sqlalchemy.engine.Engine SELECT job_seeker_skills.id AS job_seeker_skills_id, job_seeker_skills.skill_id AS job_seeker_skills_skill_id, job_seeker_skills.user_id AS job_seeker_skills_user_id, job_seeker_skills.created AS job_seeker_skills_created, job_seeker_skills.updated AS job_seeker_skills_updated 
+FROM job_seeker_skills JOIN skills ON skills.id = job_seeker_skills.skill_id 
+WHERE job_seeker_skills.user_id = %(user_id_1)s
+2023-08-18 11:38:17,612 INFO sqlalchemy.engine.Engine [generated in 0.00020s] {'user_id_1': 2}
+2023-08-18 11:38:17,615 INFO sqlalchemy.engine.Engine SELECT skills.id AS skills_id, skills.name AS skills_name, skills.lower AS skills_lower, skills.created AS skills_created, skills.updated AS skills_updated 
+FROM skills 
+WHERE skills.id = %(pk_1)s
+2023-08-18 11:38:17,615 INFO sqlalchemy.engine.Engine [generated in 0.00025s] {'pk_1': 180}
+2023-08-18 11:38:17,618 INFO sqlalchemy.engine.Engine SELECT user_resume.user_id AS user_resume_user_id, user_resume.filename AS user_resume_filename, user_resume.id AS user_resume_id, user_resume.created AS user_resume_created, user_resume.updated AS user_resume_updated 
+FROM user_resume 
+WHERE user_resume.user_id = %(user_id_1)s
+2023-08-18 11:38:17,618 INFO sqlalchemy.engine.Engine [generated in 0.00021s] {'user_id_1': 2}
+INFO:     41.215.171.56:61214 - "GET /user/ HTTP/1.1" 200 OK
+2023-08-18 11:46:08,451 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:46:08,451 INFO sqlalchemy.engine.Engine [cached since 471.7s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:49353 - "POST /auth/login HTTP/1.1" 200 OK
+2023-08-18 11:46:14,408 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:46:14,408 INFO sqlalchemy.engine.Engine [cached since 477.6s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:49532 - "POST /auth/login HTTP/1.1" 200 OK
+2023-08-18 11:47:13,026 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:47:13,026 INFO sqlalchemy.engine.Engine [cached since 536.3s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:51471 - "POST /auth/login HTTP/1.1" 200 OK
+2023-08-18 11:47:47,995 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:47:47,995 INFO sqlalchemy.engine.Engine [cached since 571.2s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:52879 - "POST /auth/login HTTP/1.1" 200 OK
+2023-08-18 11:48:53,941 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:48:53,941 INFO sqlalchemy.engine.Engine [cached since 637.2s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:55289 - "POST /auth/login HTTP/1.1" 200 OK
+2023-08-18 11:57:17,826 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.password AS users_password, users.role AS users_role, users.profile_image AS users_profile_image, users.profile_id AS users_profile_id, users.created AS users_created, users.updated AS users_updated 
+FROM users JOIN job_seekers ON job_seekers.id = users.profile_id 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2023-08-18 11:57:17,826 INFO sqlalchemy.engine.Engine [cached since 1141s ago] {'email_1': 'nunana@gmail.com', 'param_1': 1}
+user is  $2b$12$7VlGooiZH7rBLGVlhp5f8u04SGsyFcv6UfpJuI3Su9H5D7VifSBt2
+INFO:     41.215.171.56:50833 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     192.241.225.72:38536 - "GET / HTTP/1.1" 200 OK
+INFO:     192.241.225.72:40814 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     162.142.125.217:34124 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     162.142.125.217:46108 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     162.142.125.224:40010 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     162.142.125.224:48676 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.92:58464 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     134.122.55.222:59144 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     183.136.225.9:24845 - "GET / HTTP/1.1" 200 OK
+INFO:     183.136.225.9:25697 - "GET / HTTP/1.1" 200 OK
+INFO:     183.136.225.9:26193 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     183.136.225.9:28901 - "GET /robots.txt HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     34.140.248.32:50396 - "GET / HTTP/1.1" 200 OK
+INFO:     205.210.31.46:63460 - "GET / HTTP/1.1" 200 OK
+INFO:     172.105.128.12:56928 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.193:53904 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.222:65012 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.24:54903 - "GET / HTTP/1.0" 200 OK
+INFO:     71.6.134.235:46276 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     167.172.59.252:41694 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     134.122.111.31:47952 - "GET / HTTP/1.1" 200 OK
+INFO:     159.203.192.37:33738 - "GET / HTTP/1.1" 200 OK
+INFO:     159.203.192.37:43086 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.110:51698 - "GET / HTTP/1.0" 200 OK
+INFO:     198.235.24.243:52225 - "GET / HTTP/1.0" 200 OK
+INFO:     205.210.31.171:57862 - "GET / HTTP/1.1" 200 OK
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Unsupported upgrade request.
+WARNING:  No supported WebSocket library detected. Please use "pip install 'uvicorn[standard]'", or install 'websockets' or 'wsproto' manually.
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.205:63050 - "GET / HTTP/1.1" 200 OK
+INFO:     87.236.176.132:33723 - "GET / HTTP/1.1" 200 OK
+WARNING:  Invalid HTTP request received.
+INFO:     41.66.202.177:19718 - "GET / HTTP/1.1" 200 OK
+make: *** [Makefile:6: run-server] Killed
