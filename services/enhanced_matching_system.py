@@ -9,11 +9,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 import re
-import time
-import random
+from .llm import llm_client
+from models import JobSeekerSkill, Skill, JobMatch, ExternalJobMatch, Job, ExternalJob
 
-GEMINI_API_KEY = config("GEMINI_API_KEY")
-GEMINI_MIN_REQUEST_INTERVAL = config("GEMINI_MIN_REQUEST_INTERVAL", 4)
+
+# GEMINI_API_KEY = config("GEMINI_API_KEY")
 
 
 @dataclass
@@ -107,10 +107,8 @@ class PlainTextProcessor(TextProcessor):
 class SmartMatchingProcessor:
     """Enhanced processor for intelligent job/course matching"""
 
-    def __init__(self, api_key: str = GEMINI_API_KEY, model: str = "gemini-2.0-flash"):
-        self.api_key = api_key
-        self.model = model
-        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+    def __init__(self):
+        pass
 
     def calculate_semantic_match(self, user_profile: UserProfile, item_description: str,
                                  item_requirements: List[str]) -> float:
@@ -146,8 +144,9 @@ class SmartMatchingProcessor:
         """
 
         try:
-            response = self._query_llm(prompt)
+            response = llm_client.query_llm(prompt)  # Uses shared LLM client
             # Extract number from response
+
             score_match = re.search(r'\b(\d{1,3})\b', response)
             if score_match:
                 score = float(score_match.group(1))
@@ -157,23 +156,23 @@ class SmartMatchingProcessor:
             print(f"Error calculating semantic match: {e}")
             return 0.0
 
-    def _query_llm(self, prompt: str) -> str:
-        """Query the LLM with a prompt"""
+    # def _query_llm(self, prompt: str) -> str:
+    #     """Query the LLM with a prompt"""
 
-        payload = json.dumps({
-            "contents": [{"parts": [{"text": prompt}]}]
-        })
+    #     payload = json.dumps({
+    #         "contents": [{"parts": [{"text": prompt}]}]
+    #     })
 
-        headers = {
-            'Content-Type': 'application/json',
-            'X-goog-api-key': self.api_key
-        }
+    #     headers = {
+    #         'Content-Type': 'application/json',
+    #         'X-goog-api-key': self.api_key
+    #     }
 
-        response = requests.post(self.api_url, headers=headers, data=payload)
-        response.raise_for_status()
+    #     response = requests.post(self.api_url, headers=headers, data=payload)
+    #     response.raise_for_status()
 
-        resp_dict = response.json()
-        return resp_dict['candidates'][0]['content']['parts'][0]['text'].strip()
+    #     resp_dict = response.json()
+    #     return resp_dict['candidates'][0]['content']['parts'][0]['text'].strip()
 
 
 class AdvancedMatchingEngine:
@@ -292,13 +291,12 @@ class AdvancedMatchingEngine:
 class GenericLLMProcessor:
     """Enhanced Generic LLM processor with matching capabilities"""
 
-    def __init__(self, api_key: str = GEMINI_API_KEY, model: str = "gemini-2.0-flash"):
-        self.api_key = api_key
-        self.model = model
-        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+    def __init__(self):
+        pass
+        # self.api_key = api_key
+        # self.model = model
+        # self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
         self.matching_engine = AdvancedMatchingEngine()
-        self.last_request_time = None
-        self.min_interval = GEMINI_MIN_REQUEST_INTERVAL
 
         # Register text processors
         self.processors = {
@@ -326,100 +324,18 @@ class GenericLLMProcessor:
 
         return self.processors[input_type].process(input_data)
 
-    def _query_llm(self, prompt: str) -> str:
-        """Enhanced _query_llm with rate limiting and retry logic"""
+    def query_llm_with_template(self, text: str, prompt_template: str = None, custom_prompt: str = None) -> str:
+        """Send text to LLM with specified prompt using shared LLM client"""
+        if custom_prompt:
+            prompt_text = f"{text}\n\n{custom_prompt}"
+        elif prompt_template:
+            prompt_text = self._get_prompt_template(prompt_template, text)
+        else:
+            prompt_text = text
 
-        # Enforce minimum delay between requests
-        if self.last_request_time:
-            elapsed = time.time() - self.last_request_time
-            if elapsed < self.min_interval:
-                wait_time = self.min_interval - elapsed
-                print(f"Rate limiting: waiting {wait_time:.2f}s")
-                time.sleep(wait_time)
+        return llm_client.query_llm(prompt_text)
 
-        # Retry logic with exponential backoff
-        for attempt in range(3):  # 3 attempts max
-            try:
-                payload = json.dumps({
-                    "contents": [{"parts": [{"text": prompt}]}]
-                })
-
-                headers = {
-                    'Content-Type': 'application/json',
-                    'X-goog-api-key': self.api_key
-                }
-
-                # Record request time
-                self.last_request_time = time.time()
-
-                response = requests.post(
-                    self.api_url, headers=headers, data=payload, timeout=120)
-
-                # Handle 429 specifically
-                if response.status_code == 429:
-                    retry_after = int(response.headers.get('Retry-After', 30))
-                    print(
-                        f"Rate limited (attempt {attempt + 1}), waiting {retry_after}s")
-                    time.sleep(retry_after)
-                    continue
-
-                response.raise_for_status()
-                resp_dict = response.json()
-                return resp_dict['candidates'][0]['content']['parts'][0]['text'].strip()
-
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 429 and attempt < 2:
-                    # Exponential backoff: 10s, 20s, then fail
-                    wait_time = (2 ** attempt) * 10 + random.uniform(1, 5)
-                    print(
-                        f"Rate limit retry {attempt + 1}, waiting {wait_time:.2f}s")
-                    time.sleep(wait_time)
-                    continue
-                raise e
-            except Exception as e:
-                if attempt < 2:
-                    time.sleep(2 ** attempt)  # 1s, 2s delay for other errors
-                    continue
-                raise e
-
-        raise Exception("Max retries exceeded for LLM request")
-
-    # def query_llm(self, text: str, prompt_template: str = None, custom_prompt: str = None) -> str:
-    #     """
-    #     Send text to LLM with specified prompt.
-
-    #     Args:
-    #         text: Input text to process
-    #         prompt_template: Pre-defined prompt template name
-    #         custom_prompt: Custom prompt string (overrides template)
-
-    #     Returns:
-    #         Raw LLM response text
-    #     """
-    #     if custom_prompt:
-    #         prompt_text = f"{text}\n\n{custom_prompt}"
-    #     elif prompt_template:
-    #         prompt_text = self._get_prompt_template(prompt_template, text)
-    #     else:
-    #         prompt_text = text
-
-    #     payload = json.dumps({
-    #         "contents": [
-    #             {"parts": [{"text": prompt_text}]}
-    #         ]
-    #     })
-
-    #     headers = {
-    #         'Content-Type': 'application/json',
-    #         'X-goog-api-key': self.api_key
-    #     }
-
-    #     response = requests.post(self.api_url, headers=headers, data=payload)
-    #     response.raise_for_status()
-
-    #     resp_dict = response.json()
-    #     return resp_dict['candidates'][0]['content']['parts'][0]['text'].strip()
-
+    # Rest of the methods remain the same...
     def _get_prompt_template(self, template_name: str, text: str) -> str:
         """Get pre-defined prompt templates."""
         templates = {
@@ -581,7 +497,8 @@ class GenericLLMProcessor:
         text = self.process_input(input_data, input_type)
 
         # Step 2: Query LLM
-        llm_response = self.query_llm(text, prompt_template, custom_prompt)
+        llm_response = self.query_llm_with_template(
+            text, prompt_template, custom_prompt)
 
         # Step 3: Parse output based on format
         if output_format == 'raw':
@@ -658,7 +575,7 @@ class JobCourseMatchingService:
 
     def save_job_matches(self, user_id: int, matches: List[MatchResult]):
         """Save job matches to database"""
-        from models.job import JobMatch, ExternalJobMatch  # Adjust import as needed
+        # from models.job import JobMatch, ExternalJobMatch  # Adjust import as needed
 
         for match in matches:
             try:
@@ -727,9 +644,8 @@ class JobCourseMatchingService:
         Returns:
             List of recommended jobs with match info
         """
-        from models import JobMatch, Job, ExternalJobMatch, ExternalJob  # Adjust import as needed
+        # from models import JobMatch, Job, ExternalJobMatch, ExternalJob
 
-        # Get job matches
         job_matches = self.session.query(JobMatch).join(
             Job, JobMatch.job_id == Job.id
         ).filter(
@@ -791,3 +707,22 @@ class JobCourseMatchingService:
         recommendations.sort(key=lambda x: x["match_score"], reverse=True)
 
         return recommendations[:limit]
+
+    def extract_skills_from_job_recommendations(self, job_recommendations: List[Dict]):
+
+        user_skills = set()
+        missing_skills = set()
+
+        for job in job_recommendations:
+            # Calculate matched skills (total skills - missing skills)
+            total_skills = set(job.get("skills", []))
+            job_missing_skills = set(job.get("missing_skills", []))
+            matched_skills = total_skills - job_missing_skills
+
+            user_skills.update(matched_skills)
+            missing_skills.update(job_missing_skills)
+
+        return {
+            "user_skills": list(user_skills),
+            "missing_skills": list(missing_skills)
+        }

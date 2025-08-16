@@ -10,6 +10,8 @@ import bcrypt
 import datetime
 import jwt
 import os
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"])
+
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -72,6 +74,7 @@ async def login(request: Request, data: LoginData):
             User.email == data.email).first()
 
         if user is not None:
+
             if bcrypt.checkpw(data.password.encode("utf-8"), user.password.encode("utf-8")):
                 token = generate_token(
                     {
@@ -80,7 +83,7 @@ async def login(request: Request, data: LoginData):
                         "email": user.email,
                         "role": user.role,
                         "exp": datetime.datetime.now(tz=datetime.timezone.utc)
-                        + datetime.timedelta(hours=24),
+                        + datetime.timedelta(hours=ACCESS_TOKEN_EXPIRE_MINUTES),
                     })
                 # token_db.add(token)
                 return sendSuccess({"token": token, "user": user.to_json()})

@@ -93,6 +93,8 @@ class JobMatch(Base):
     created = mapped_column(DateTime(), nullable=False,
                             default=datetime.utcnow)
 
+    job = relationship("Job")
+
 
 class UserJobPreferences(Base):
     __tablename__ = "user_job_preferences"
@@ -144,3 +146,5 @@ class ExternalJobMatch(Base):
     missing_skills = mapped_column(ARRAY(String()))
     created = mapped_column(DateTime(), nullable=False,
                             default=datetime.utcnow)
+
+    external_job = relationship("ExternalJob", backref="job_matches")

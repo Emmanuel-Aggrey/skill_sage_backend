@@ -3,6 +3,7 @@
 #     OptimizedMatchingService, PerformanceMonitor, create_cache_tables
 # )
 # from enhanced_matching_system import GenericLLMProcessor, JobCourseMatchingService, UserProfile
+import email
 from pydantic import BaseModel, EmailStr
 
 from models.user import (
@@ -23,6 +24,7 @@ from db.connection import session, recommend
 from fastapi import APIRouter, Request, Depends, status, UploadFile, Response, BackgroundTasks, Query
 from typing import List, Optional, Dict, Any
 import datetime
+
 import uuid
 import copy
 from fastapi.responses import JSONResponse
@@ -36,6 +38,16 @@ from services.matching_cache_manager import (
     EnhancedMatchingController, MatchingSystemConfig, MatchingCacheManager,
     OptimizedMatchingService, PerformanceMonitor, create_cache_tables, UserMatchingPreferences
 )
+
+
+def get_enhanced_controller(session) -> EnhancedMatchingController:
+    """Dependency to get enhanced matching controller"""
+    llm_processor = GenericLLMProcessor()
+    return EnhancedMatchingController(session, llm_processor)
+
+
+llm = GenericLLMProcessor()
+controller = get_enhanced_controller(session)
 
 
 def get_matching_service(session) -> JobCourseMatchingService:
@@ -64,8 +76,7 @@ app_router = APIRouter(
 async def get_user(request: Request):
     try:
         user_id = request.state.user["id"]
-        print("user is == ", user_id)
-        # user = session.query(User).join(User.profile).join(User.experiences).join(User.education).filter(User.id == user_id).first()
+
         user = session.query(User).join(
             User.profile).filter(User.id == user_id).first()
         if user is None:
@@ -93,19 +104,25 @@ async def get_user(request: Request):
 
         base_url = request.url._url
         resume_links = []
+        latest_llm_insights = None
+
         links = session.query(UserResume).filter(
-            UserResume.user_id == user_id).all()
+            UserResume.user_id == user_id
+        ).order_by(UserResume.id.desc()).all()  # Order by latest first
+
         for i in links:
             resume_links.append(base_url + "file/" + i.filename)
+            if i.llm_insights:
+                latest_llm_insights = i.llm_insights
 
         user.skills = skills
         user.resume = resume_links
+        user.llm_insights = llm.parse_json_output(latest_llm_insights)
 
         u = copy.copy(user)
         if user.profile_image is not None:
             img = user.profile_image
             u.profile_image = base_url + "file/" + img
-            # http://localhost:8000/user/file/http://localhost:8000/user/file/b695185f-2d2d-4b7a-b8e1-0ab4dd75f32a.jpg
 
         return sendSuccess(u.to_json())
     except Exception as err:
@@ -115,19 +132,23 @@ async def get_user(request: Request):
         session.close()
 
 
-# class UpdateUser(BaseModel):
-#     name: str
-#     email: EmailStr
+class UpdateUser(BaseModel):
+    name: str
+    email: EmailStr
+
 
 # @router.put("/profile")
 # async def update_profile(request: Request, data: UpdateUser):
+#     """Update user profile information"""
 #     try:
-#         user = session.query(User).filter(User.id == request.state.user["id"]).first()
+#         user = session.query(User).filter(
+#             User.id == request.state.user["id"]).first()
 #         user.name = data.name
 #         user.email = data.email
 #         session.commit()
 #         return sendSuccess("profile updated")
 #     except Exception as err:
+#         print(err)
 #         return sendError("internal server error", 500)
 
 
@@ -142,470 +163,7 @@ class ExperienceData(BaseModel):
     tasks: Optional[str] = None
 
 
-@router.post("/experience", status_code=status.HTTP_201_CREATED)
-async def add_experience(request: Request, data: ExperienceData):
-    exp = Experience()
-    try:
-        exp.user_id = request.state.user["seeker_id"]
-        exp.company_name = data.company_name
-        exp.job_title = data.job_title
-        exp.start_date = data.start_date
-        exp.end_date = data.end_date
-        exp.is_remote = data.is_remote
-        exp.has_completed = data.has_completed
-        exp.tasks = data.tasks
-        session.add(exp)
-        session.commit()
-
-        # new_exp = session.query(Experience).filter(Experience.id == exp.id).first()
-        return sendSuccess("created")
-    except Exception as err:
-        print(err)
-        session.rollback()
-        sendError("unable to add experience")
-    finally:
-        session.close()
-
-
-@router.delete("/experience/{id}", status_code=200)
-async def delete_experience(id: str, request: Request):
-    try:
-        user_id = request.state.user["id"]
-        exp = (
-            session.query(Experience)
-            .filter(Experience.id == id, Experience.user_id == user_id)
-            .first()
-        )
-        session.delete(exp)
-        session.commit()
-        return sendSuccess("deleted")
-    except Exception as err:
-        session.rollback()
-        return sendError("unable to delete experience")
-    finally:
-        session.close()
-
-
-@router.put("/experience", status_code=200)
-async def update_experience(request: Request, data: ExperienceData):
-    try:
-        user_id = request.state.user["id"]
-        exp = (
-            session.query(Experience)
-            .filter(Experience.id == data.id, Experience.user_id == user_id)
-            .first()
-        )
-        if exp is None:
-            return sendError("experience not found")
-
-        print("data is ", data)
-        print("data is ", exp)
-        exp.company_name = data.company_name
-        exp.job_title = data.job_title
-        exp.start_date = data.start_date
-        exp.end_date = data.end_date
-        exp.is_remote = data.is_remote
-        exp.has_completed = data.has_completed
-        exp.tasks = data.tasks
-        session.commit()
-        return sendSuccess("saved")
-    except Exception as err:
-        session.rollback()
-        print(err)
-        sendError("unable to update experience")
-    finally:
-        session.close()
-
-
-class EducationData(BaseModel):
-    id: Optional[int] = None
-    program: str
-    institution: str
-    start_date: datetime.date
-    end_date: Optional[datetime.date] = None
-    has_completed: bool = False
-
-
-@router.put("/education")
-def update_education(request: Request, data: EducationData):
-    try:
-        user_id = request.state.user["id"]
-        edu = (
-            session.query(Education)
-            .filter(Education.id == data.id, Education.user_id == user_id)
-            .first()
-        )
-        if edu is None:
-            return sendError("not found")
-        edu.program = data.program
-        edu.institution = data.institution
-        edu.start_date = data.start_date
-        edu.end_date = data.end_date
-        edu.has_completed = data.has_completed
-        session.commit()
-        return sendSuccess("updated")
-
-    except Exception as err:
-        session.rollback()
-        return sendError("uanle to update education")
-    finally:
-        session.close()
-
-
-@router.delete("/education/{id}")
-def delete_education(request: Request, id: str):
-    try:
-        user_id = request.state.user["id"]
-        edu = (
-            session.query(Education)
-            .filter(Education.id == id, Education.user_id == user_id)
-            .first()
-        )
-        if edu is None:
-            return sendError("not found")
-        session.delete(edu)
-        session.commit()
-
-        return sendSuccess("deleted")
-    except Exception as err:
-        session.rollback()
-        return sendError("uanle to update education")
-    finally:
-        session.close()
-
-
-@router.post("/education")
-def add_education(request: Request, data: EducationData):
-    ed = Education()
-
-    ed.user_id = request.state.user["id"]
-    ed.program = data.program
-    ed.institution = data.institution
-    ed.start_date = data.start_date
-    ed.end_date = data.end_date
-    ed.has_completed = data.has_completed
-
-    try:
-        session.add(ed)
-        session.commit()
-        return sendSuccess(ed)
-    except Exception as err:
-        session.rollback()
-        return sendError("unable to add education")
-    finally:
-        session.close()
-
-
-@router.get("/skill")
-async def get_skills(request: Request):
-    try:
-        res = (
-            session.query(Skill)
-            .join(JobSeekerSkill)
-            .filter(JobSeekerSkill.user_id == request.state.user["id"])
-            .all()
-        )
-        return sendSuccess(res)
-    except Exception as err:
-        session.rollback()
-        print(err)
-        return sendError(
-            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    finally:
-        session.close()
-
-
-@router.get("/skills")
-async def get_all_skills(request: Request):
-    q = request.query_params.get("q")
-    # serrch
-    try:
-        query = session.query(Skill)
-        if q is not None:
-            query = query.filter(Skill.lower.ilike("%{}%".format(q.lower())))
-        res = query.limit(50).all()
-
-        return sendSuccess(list(map(lambda x: {"id": x.id, "name": x.name}, res)))
-    except Exception as err:
-        session.rollback()
-        print(err)
-        return sendError(
-            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-    finally:
-        session.close()
-
-
-@router.get("/recommend_skills")
-async def recommended_skills(request: Request):
-    limit_q = request.query_params.get("limit")
-
-    limit = 20
-    if limit_q is not None:
-        limit = int(limit_q)
-
-    user_id = request.state.user["id"]
-    skills = []
-    try:
-        user_skills = (
-            session.query(JobSeekerSkill)
-            .join(JobSeekerSkill.skill)
-            .filter(JobSeekerSkill.user_id == user_id)
-            .all()
-        )
-        for i in user_skills:
-            skills.append(i.skill.lower)
-        return sendSuccess(recommend(skills, limit))
-        # do recommendation
-    except Exception as err:
-        session.rollback()
-        return sendError(err.args)
-    finally:
-        session.close()
-
-
-# skill model for request body
-
-
-class SkillData(BaseModel):
-    skills: List[int]
-
-
-@router.post("/skill")
-async def add_skill(request: Request, data: SkillData):
-    user_id = request.state.user["id"]
-    try:
-        exist = (
-            session.query(JobSeekerSkill)
-            .filter(JobSeekerSkill.user_id == user_id)
-            .all()
-        )
-        for i in exist:
-            session.delete(i)
-        for skill_id in data.skills:
-            count = session.query(Skill).filter(Skill.id == skill_id).count()
-            if count > 0:
-                print("adding ", skill_id, " to ", user_id)
-                sk = JobSeekerSkill()
-                sk.skill_id = skill_id
-                sk.user_id = user_id
-                session.add(sk)
-
-        session.commit()
-        return sendSuccess("skills uploaded")
-    except Exception as err:
-        session.rollback()
-        return sendError(err.args)
-    finally:
-        session.close()
-
-
-# TODO: remove
-class SkillCreate(BaseModel):
-    skills: List[str]
-
-
-@router.post("/create_skill", status_code=status.HTTP_201_CREATED)
-async def create_skill(data: SkillCreate):
-    try:
-        for name in data.skills:
-            existing_skill = session.query(
-                Skill).filter(Skill.name == name).count()
-            if existing_skill < 1:
-                sk = Skill(name)
-                session.add(sk)
-                session.commit()
-
-        return sendSuccess("created")
-    except Exception as err:
-        session.rollback()
-        return sendError(err.args)
-    finally:
-        session.close()
-
-
-class UpdateProfile(BaseModel):
-    name: Optional[str] = None
-    about: Optional[str] = None
-    location: Optional[str] = None
-    portfolio: Optional[str] = None
-    languages: Optional[List[str]] = None
-
-
-@router.put("/profile")
-async def update_profile(request: Request, data: UpdateProfile):
-    # print(data)
-    try:
-        user = session.query(User).filter(
-            User.id == request.state.user["id"]).first()
-        profile = (
-            session.query(JobSeeker).filter(
-                JobSeeker.id == user.profile_id).first()
-        )
-        if data.name is not None:
-            user.name = data.name
-        if data.about is not None:
-            profile.about = data.about
-        if data.location is not None:
-            profile.location = data.location
-        if data.portfolio is not None:
-            profile.portfolio = data.portfolio
-        if data.languages is not None:
-            profile.languages = data.languages
-
-        session.commit()
-        return sendSuccess("Profile updated successfully")
-
-    except Exception as err:
-        session.rollback()
-        print(err)
-        return sendError("internal server error", 500)
-    finally:
-        session.close()
-
-
-@router.post("/image", status_code=status.HTTP_201_CREATED)
-async def upload_image(img: UploadFile, request: Request):
-    user_id = request.state.user["id"]
-    try:
-        user = session.query(User).filter(User.id == user_id).first()
-        # if user.profile_image is not None:
-        #     file_delete = session.query(File).filter(File.filename).first()
-        #     session.delete(file_delete)
-        # http://143.198.235.166:3000/
-        new_file = await img.read()
-        fileSha = getSha(new_file)
-        ex_chunk = img.filename.split(".")
-        ext = ex_chunk[len(ex_chunk) - 1:][0]
-        filename = str(uuid.uuid4()) + "." + ext
-        print(filename, ext, sep=" |  ")
-        dbImg = File(
-            data=new_file, filename=filename, type=img.content_type, sha=fileSha
-        )
-        session.add(dbImg)
-        user.profile_image = filename
-
-        session.commit()
-        return sendSuccess("uploaded")
-    except Exception as err:
-        session.rollback()
-        return sendError(err.args)
-    finally:
-        session.close()
-
-    # existing picture
-    # yes: delete
-    # upload new one
-
-
-# @router.post("/upload_resume", status_code=status.HTTP_201_CREATED)
-# async def upload_resume(file: UploadFile, request: Request):
-#     user_id = request.state.user["id"]
-#     try:
-
-#         new_file = await file.read()
-#         fileSha = getSha(new_file)
-#         # existing_file = session.query(File).filter(File.sha == fileSha).first()
-#         ex_chunk = file.filename.split(".")
-#         ext = ex_chunk[len(ex_chunk) - 1:][0]
-#         filename = str(uuid.uuid4()) + "." + ext
-
-#         llm = GenericLLMProcessor()
-#         skills = llm.process_and_extract(
-#             new_file, 'pdf', 'list', 'skills_extraction')
-
-#         resume_text = llm.extract_text_only(new_file, 'pdf')
-
-#         # Persist extracted skills: ensure they exist in `skills` table and
-#         # create user mappings in `job_seeker_skills` (avoid duplicates)
-#         if isinstance(skills, list):
-#             for skill_name in skills:
-#                 if not isinstance(skill_name, str):
-#                     continue
-#                 cleaned_name = skill_name.strip()
-#                 if not cleaned_name:
-#                     continue
-#                 lower_name = cleaned_name.lower()
-
-#                 # Upsert into skills table (simple insert if missing)
-#                 existing_skill = (
-#                     session.query(Skill)
-#                     .filter(Skill.lower == lower_name)
-#                     .first()
-#                 )
-#                 if existing_skill is None:
-#                     new_skill = Skill(cleaned_name)
-#                     new_skill.lower = lower_name
-#                     session.add(new_skill)
-#                     session.flush()  # get id
-#                     skill_id = new_skill.id
-#                 else:
-#                     skill_id = existing_skill.id
-
-#                 # Create mapping if not already present
-#                 existing_map_count = (
-#                     session.query(JobSeekerSkill)
-#                     .filter(
-#                         JobSeekerSkill.user_id == user_id,
-#                         JobSeekerSkill.skill_id == skill_id,
-#                     )
-#                     .count()
-#                 )
-#                 if existing_map_count < 1:
-#                     jss = JobSeekerSkill()
-#                     jss.user_id = user_id
-#                     jss.skill_id = skill_id
-#                     session.add(jss)
-
-#         # Remove any existing resume(s) for this user before saving the new one
-#         existing_resumes = (
-#             session.query(UserResume)
-#             .filter(UserResume.user_id == user_id)
-#             .all()
-#         )
-#         for er in existing_resumes:
-#             old_file = session.query(File).filter(
-#                 File.filename == er.filename).first()
-#             if old_file is not None:
-#                 session.delete(old_file)
-#             session.delete(er)
-#         resume = File(
-#             data=new_file, filename=filename, type=file.content_type, sha=fileSha
-#         )
-
-#         session.add(resume)
-#         session.flush()
-#         session.add(UserResume(filename=resume.filename,
-#                     user_id=user_id, resume_text=resume_text))
-
-#         session.commit()
-#         return sendSuccess(f"{file.filename} uploaded")
-#     except Exception as err:
-#         session.rollback()
-#         print(err)
-#         return sendError("Internal Server Error", 500)
-#     finally:
-#         session.close()
-
-
-# Enhanced FastAPI endpoints using the new matching system
-
-# router = APIRouter()
-
-
-# Import our enhanced modules
-
-# router = APIRouter(prefix="/api/v2", tags=["Enhanced Matching"])
-
-# Global configuration
 MATCHING_CONFIG = MatchingSystemConfig.load_from_env()
-
-
-def get_enhanced_controller(session) -> EnhancedMatchingController:
-    """Dependency to get enhanced matching controller"""
-    llm_processor = GenericLLMProcessor()
-    return EnhancedMatchingController(session, llm_processor)
 
 
 @router.post("/upload_resume", status_code=status.HTTP_201_CREATED)
@@ -631,15 +189,16 @@ async def upload_resume_v2(
         filename = str(uuid.uuid4()) + "." + ext
 
         # Initialize enhanced processor
-        llm = GenericLLMProcessor()
-        controller = get_enhanced_controller(session)
+        # llm = GenericLLMProcessor()
+        # controller = get_enhanced_controller(session)
 
         # Create comprehensive user profile
         user_profile = llm.create_user_profile(user_id, new_file, 'pdf')
 
         # Extract additional insights
-        career_insights = llm.query_llm(
-            user_profile.resume_text[:2000],  # Limit text for API efficiency
+        career_insights = llm.query_llm_with_template(
+            # Limit text for API efficiency
+            text=user_profile.resume_text[:2000],
             custom_prompt="""
             Analyze this resume and provide insights in JSON format:
             {
@@ -655,7 +214,8 @@ async def upload_resume_v2(
 
         try:
             insights = llm.parse_json_output(career_insights)
-        except:
+        except Exception as e:
+            print(f"Error parsing JSON output: {e}")
             insights = {"career_stage": "unknown", "primary_domain": "unknown"}
 
         # Save skills (existing logic enhanced)
@@ -785,26 +345,27 @@ async def upload_resume_v2(
 
 
 async def enhanced_background_matching(user_id: int, match_threshold: float = 40.0,
-                                       include_courses: bool = True):
+                                       include_courses: bool = True, force_refresh: bool = False):
     """Enhanced background task for generating matches with caching"""
     try:
-        controller = get_enhanced_controller(session)
+        controller: EnhancedMatchingController = get_enhanced_controller(
+            session)
 
         # Process job matching
         job_result = controller.process_user_matching_request(
-            user_id, 'job', force_refresh=True, limit=50
+            user_id, 'job', force_refresh=force_refresh, limit=50
         )
 
         # Process external job matching
         external_job_result = controller.process_user_matching_request(
-            user_id, 'external_job', force_refresh=True, limit=50
+            user_id, 'external_job', force_refresh=force_refresh, limit=50
         )
 
         # Process course matching if enabled
         course_result = None
         if include_courses:
             course_result = controller.process_user_matching_request(
-                user_id, 'course', force_refresh=True, limit=20
+                user_id, 'course', force_refresh=force_refresh, limit=20
             )
 
         print(f"Enhanced matching completed for user {user_id}:")
@@ -817,6 +378,40 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
 
     except Exception as e:
         print(f"Enhanced background matching error for user {user_id}: {e}")
+    finally:
+        session.close()
+
+
+@router.get("/me/recommendations")
+async def get_user_recommendations(request: Request,  min_match_score: int = 40, limit: int = 20):
+    """Get user's recommended jobs"""
+    user_id = request.state.user["id"]
+
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+    print('recommendations', user_id)
+
+    try:
+        controller = get_enhanced_controller(session)
+        matching_service = JobCourseMatchingService(
+            session, controller.llm_processor)
+
+        recommended_job = matching_service.get_recommended_jobs(
+            user_id=user_id, min_match_score=float(min_match_score), limit=limit)
+
+        return JSONResponse(content={"success": True, "data": recommended_job})
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
     finally:
         session.close()
 
@@ -970,6 +565,8 @@ async def get_detailed_match_analysis_v2(
     item_type: str,
     item_id: int,
     request: Request,
+    force_refresh: bool = Query(
+        False, description="Force cache refresh"),
     include_improvement_plan: bool = Query(
         True, description="Include improvement plan"),
     include_similar_items: bool = Query(
@@ -978,10 +575,12 @@ async def get_detailed_match_analysis_v2(
     """
     Enhanced detailed match analysis with improvement suggestions
     """
+
     user_id = request.state.user["id"]
 
     try:
-        controller = get_enhanced_controller(session)
+        controller: EnhancedMatchingController = get_enhanced_controller(
+            session)
         matching_service = JobCourseMatchingService(
             session, controller.llm_processor)
         user_profile = matching_service.get_user_profile_from_db(user_id)
@@ -1045,7 +644,7 @@ async def get_detailed_match_analysis_v2(
         similar_items = []
         if include_similar_items:
             similar_items = await find_similar_opportunities(
-                item_data, item_type, user_profile, controller, limit=3
+                item_data, item_type, user_profile, controller, limit=3, force_refresh=force_refresh
             )
 
         analysis = {
@@ -1086,26 +685,769 @@ async def generate_improvement_plan(user_profile: UserProfile, missing_skills: L
         llm = GenericLLMProcessor()
 
         plan_prompt = f"""
-        Create a personalized improvement plan for this user to increase their match score for this {item_type}.
-        
-        User's Current Skills: {', '.join(user_profile.skills)}
-        Missing Skills Needed: {', '.join(missing_skills)}
-        Target {item_type.title()}: {item_data.get('title', 'Unknown')}
-        
-        Provide a structured improvement plan in JSON format:
-        {{
-            "improvement_steps": ["step1", "step2", "step3"],
-            "estimated_time": "3 months",
-            "resources": ["resource1", "resource2"]
-        }}
-        """
+            Create a personalized improvement plan for this user to increase their match score for this {item_type}.
+            
+            User's Current Skills: {', '.join(user_profile.skills)}
+            Missing Skills Needed: {', '.join(missing_skills)}
+            Target {item_type.title()}: {item_data.get('title', 'Unknown')}
+            
+            Provide a structured improvement plan in JSON format:
+            {{
+                "improvement_steps": ["step1", "step2", "step3"],
+                "estimated_time": "3 months",
+                "resources": ["resource1", "resource2"]
+            }}
+            """
 
-        plan_response = llm.query_llm(
-            plan_prompt, custom_prompt="improvement_plan")
+        # Use custom_prompt instead of prompt_template
+        plan_response = llm.query_llm_with_template(
+            "", custom_prompt=plan_prompt)
+
         return llm.parse_json_output(plan_response)
     except Exception as e:
         print(f"Error generating improvement plan: {e}")
         return {}
+
+
+async def find_similar_opportunities(item_data: Dict, item_type: str, user_profile: UserProfile,
+                                     controller: EnhancedMatchingController, limit: int = 3, force_refresh: bool = False) -> List[Dict]:
+    """Find similar opportunities that might be good matches"""
+    try:
+        # Get recommendations of the same type
+        result = controller.process_user_matching_request(
+            user_profile.user_id, item_type, force_refresh=force_refresh, limit=20
+        )
+
+        recommendations = result.get('recommendations', [])
+
+        # Filter out the current item and find similar ones
+        similar = []
+        current_skills = set(item_data.get('skills', []))
+        current_title_words = set(item_data.get('title', '').lower().split())
+
+        for rec in recommendations:
+            if rec.get('item_id') == item_data.get('id'):
+                continue  # Skip current item
+
+            rec_data = rec.get('item_data', {})
+            rec_skills = set(rec_data.get('skills', []))
+            rec_title_words = set(rec_data.get('title', '').lower().split())
+
+            # Calculate similarity based on skills and title
+            skill_similarity = len(current_skills.intersection(
+                rec_skills)) / max(len(current_skills.union(rec_skills)), 1)
+            title_similarity = len(current_title_words.intersection(
+                rec_title_words)) / max(len(current_title_words.union(rec_title_words)), 1)
+
+            combined_similarity = (skill_similarity * 0.7) + \
+                (title_similarity * 0.3)
+
+            if combined_similarity > 0.3:  # Minimum similarity threshold
+                similar.append({
+                    **rec,
+                    "similarity_score": round(combined_similarity * 100, 1)
+                })
+
+        # Sort by similarity and match score
+        similar.sort(key=lambda x: (x.get('similarity_score', 0) +
+                     x.get('match_score', 0)), reverse=True)
+
+        return similar[:limit]
+
+    except Exception as e:
+        print(f"Error finding similar opportunities: {e}")
+        return []
+
+
+def get_readiness_assessment(match_score: float) -> str:
+    """Get readiness assessment based on match score"""
+    if match_score >= 80:
+        return "Excellent match - You're well-qualified for this opportunity"
+    elif match_score >= 60:
+        return "Good match - You meet most requirements with minor gaps"
+    elif match_score >= 40:
+        return "Fair match - Some skill development recommended"
+    else:
+        return "Limited match - Significant preparation needed"
+
+
+def calculate_profile_strength(user_profile: UserProfile) -> str:
+    """Calculate overall profile strength"""
+    score = 0
+
+    # Skills count
+    if len(user_profile.skills) >= 10:
+        score += 30
+    elif len(user_profile.skills) >= 5:
+        score += 20
+    else:
+        score += 10
+
+    # Resume quality (length as proxy)
+    if user_profile.resume_text and len(user_profile.resume_text) > 2000:
+        score += 25
+    elif user_profile.resume_text and len(user_profile.resume_text) > 1000:
+        score += 15
+    else:
+        score += 5
+
+    # Experience level
+    if user_profile.experience_level in ['Senior Level', 'Executive']:
+        score += 25
+    elif user_profile.experience_level == 'Mid Level':
+        score += 20
+    else:
+        score += 10
+
+    # Remaining 20 points for completeness
+    score += 20
+
+    if score >= 80:
+        return "Strong"
+    elif score >= 60:
+        return "Good"
+    elif score >= 40:
+        return "Developing"
+    else:
+        return "Basic"
+
+
+@router.api_route("/preferences", methods=["GET", "PATCH", "PUT"])
+async def user_matching_preferences(request: Request):
+    """Get or update user's matching preferences"""
+    user_id = request.state.user["id"]
+
+    try:
+        controller = get_enhanced_controller(session)
+
+        if request.method == "GET":
+            preferences = controller.optimized_service.get_user_preferences(
+                user_id)
+            return JSONResponse(content={"success": True, "data": preferences})
+
+        elif request.method in ["PATCH", "PUT"]:
+            preferences = await request.json()
+            controller.optimized_service.update_user_preferences(
+                user_id, preferences)
+            return JSONResponse(content={
+                "success": True,
+                "message": "Preferences updated successfully. Cache cleared for fresh recommendations."
+            })
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+@router.get("/extract_skills_from_job_recommendations")
+async def extract_skills_from_job_recommendations(request: Request, min_match_score: int = 40, limit: int = 20):
+
+    try:
+        user_id = request.state.user["id"]
+
+        job_service = JobCourseMatchingService(session)
+
+        job_recommendations = job_service.get_recommended_jobs(
+            user_id=user_id, min_match_score=min_match_score, limit=limit)
+
+        skills_data = job_service.extract_skills_from_job_recommendations(
+            job_recommendations)
+
+        return sendSuccess(skills_data)
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+
+@router.post("/refresh_all_matches")
+async def refresh_all_user_matches(request: Request, background_tasks: BackgroundTasks):
+    """Refresh all matches for the user (jobs, external jobs, courses)"""
+    user_id = request.state.user["id"]
+
+    try:
+        controller = get_enhanced_controller(session)
+
+        # Clear all existing cache
+        controller.cache_manager.invalidate_user_cache(user_id)
+
+        # Schedule comprehensive background refresh
+        background_tasks.add_task(
+            comprehensive_match_refresh, user_id, force_refresh=True)
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "Comprehensive match refresh initiated. This may take a few minutes.",
+            "estimated_completion": "2-5 minutes"
+        })
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False, limit: int = 50):
+    """Comprehensive background refresh of all matches"""
+    try:
+        controller = get_enhanced_controller(session)
+
+        print(f"Starting comprehensive refresh for user {user_id}")
+
+        # Refresh internal jobs
+        job_result = controller.process_user_matching_request(
+            user_id, 'job', force_refresh=force_refresh, limit=limit
+        )
+
+        # Refresh external jobs (now properly supported)
+        external_result = controller.process_user_matching_request(
+            user_id, 'external_job', force_refresh=force_refresh, limit=limit
+        )
+
+        # # Refresh courses
+        course_result = controller.process_user_matching_request(
+            user_id, 'course', force_refresh=force_refresh, limit=limit
+        )
+
+        print(f"Comprehensive refresh completed for user {user_id}:")
+        print(
+            f"  - Internal Jobs: {len(job_result.get('recommendations', []))}")
+        print(
+            f"  - External Jobs: {len(external_result.get('recommendations', []))}")
+        print(f"  - Courses: {len(course_result.get('recommendations', []))}")
+
+        # Check for errors
+        if job_result.get('error'):
+            print(f"  - Internal Jobs Error: {job_result['error']}")
+        if external_result.get('error'):
+            print(f"  - External Jobs Error: {external_result['error']}")
+        if course_result.get('error'):
+            print(f"  - Courses Error: {course_result['error']}")
+
+        # Cleanup and optimize
+        cleanup_result = controller.cleanup_and_optimize(user_id)
+        print(
+            f"  - Cache cleanup: {cleanup_result.get('expired_entries_removed', 0)} entries removed")
+
+        return {
+            "job_recommendations": job_result.get('recommendations', []),
+            "external_job_recommendations": external_result.get('recommendations', []),
+            "course_recommendations": course_result.get('recommendations', []),
+            "cleanup_stats": cleanup_result
+        }
+
+    except Exception as e:
+        print(f"Comprehensive refresh error for user {user_id}: {e}")
+        return {"error": str(e)}
+    finally:
+        session.close()
+
+# async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False, limit: int = 50):
+#     """Comprehensive background refresh of all matches"""
+#     try:
+#         controller = get_enhanced_controller(session)
+
+#         print(f"Starting comprehensive refresh for user {user_id}")
+
+#         # Refresh jobs
+#         job_result = controller.process_user_matching_request(
+#             user_id, 'job', force_refresh=force_refresh, limit=limit
+#         )
+
+#         # print('job_result', job_result)
+
+#         # Refresh external jobs
+#         external_result = controller.process_user_matching_request(
+#             user_id, 'external_job', force_refresh=force_refresh, limit=limit
+#         )
+
+#         # Refresh courses
+#         course_result = controller.process_user_matching_request(
+#             user_id, 'course', force_refresh=force_refresh, limit=limit
+#         )
+
+#         print(f"Comprehensive refresh completed for user {user_id}:")
+#         print(
+#             f"  - Internal Jobs: {len(job_result.get('recommendations', []))}")
+#         print(
+#             f"  - External Jobs: {len(external_result.get('recommendations', []))}")
+#         print(f"  - Courses: {len(course_result.get('recommendations', []))}")
+
+#         # Cleanup and optimize
+#         controller.cleanup_and_optimize(user_id)
+
+#     except Exception as e:
+#         print(f"Comprehensive refresh error for user {user_id}: {e}")
+#     finally:
+#         session.close()
+
+
+@router.get("/system_stats")
+async def get_system_statistics(request: Request):
+    """Get system performance and cache statistics (admin only)"""
+    # Add admin check here based on your auth system
+    user_role = request.state.user.get("role")
+
+    if user_role.lower() != "admin":
+        return JSONResponse(status_code=403, content={"success": False, "error": "Admin access required"})
+
+    try:
+        controller = get_enhanced_controller(session)
+
+        # Get cache statistics
+        cache_stats = controller.cache_manager.get_cache_stats()
+
+        # Get performance metrics
+        performance_stats = controller.performance_monitor.get_stats()
+
+        # Get database statistics
+        total_users = session.query(User).count()
+        total_jobs = session.query(Job).count()
+        total_external_jobs = session.query(ExternalJob).filter(
+            ExternalJob.is_active == True).count()
+        total_courses = session.query(Course).filter(
+            Course.isActive == True).count()
+
+        # Recent activity
+        recent_uploads = session.query(UserResume).filter(
+            UserResume.created >= datetime.datetime.utcnow() - datetime.timedelta(days=7)
+        ).count()
+
+        stats = {
+            "cache_statistics": cache_stats,
+            "performance_metrics": performance_stats,
+            "database_counts": {
+                "total_users": total_users,
+                "total_jobs": total_jobs,
+                "total_external_jobs": total_external_jobs,
+                "total_courses": total_courses
+            },
+            "recent_activity": {
+                "resume_uploads_last_7_days": recent_uploads
+            },
+            "system_health": "healthy",  # Add actual health checks
+            "last_updated": datetime.datetime.utcnow().isoformat()
+        }
+
+        return JSONResponse(content={"success": True, "data": stats})
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+@router.post("/cleanup_system")
+async def cleanup_system_cache(request: Request, background_tasks: BackgroundTasks):
+    """Cleanup expired cache and optimize system (admin only)"""
+    user_role = request.state.user.get("role")
+
+    if user_role.lower() != "admin":
+        return JSONResponse(status_code=403, content={"success": False, "error": "Admin access required"})
+
+    try:
+        controller = get_enhanced_controller(session)
+
+        # Schedule cleanup in background
+        background_tasks.add_task(perform_system_cleanup, controller)
+
+        return JSONResponse(content={
+            "success": True,
+            "message": "System cleanup initiated"
+        })
+
+    except Exception as err:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(err)}
+        )
+    finally:
+        session.close()
+
+
+async def perform_system_cleanup(controller: EnhancedMatchingController):
+    """Perform system cleanup tasks"""
+    try:
+        cleanup_result = controller.cleanup_and_optimize()
+        print(f"System cleanup completed: {cleanup_result}")
+
+    except Exception as e:
+        print(f"System cleanup error: {e}")
+
+
+# OLD APIS
+
+@router.post("/experience", status_code=status.HTTP_201_CREATED)
+async def add_experience(request: Request, data: ExperienceData):
+    exp = Experience()
+    try:
+        exp.user_id = request.state.user["seeker_id"]
+        exp.company_name = data.company_name
+        exp.job_title = data.job_title
+        exp.start_date = data.start_date
+        exp.end_date = data.end_date
+        exp.is_remote = data.is_remote
+        exp.has_completed = data.has_completed
+        exp.tasks = data.tasks
+        session.add(exp)
+        session.commit()
+
+        # new_exp = session.query(Experience).filter(Experience.id == exp.id).first()
+        return sendSuccess("created")
+    except Exception as err:
+        print(err)
+        session.rollback()
+        sendError("unable to add experience")
+    finally:
+        session.close()
+
+
+@router.delete("/experience/{id}", status_code=200)
+async def delete_experience(id: str, request: Request):
+    try:
+        user_id = request.state.user["id"]
+        exp = (
+            session.query(Experience)
+            .filter(Experience.id == id, Experience.user_id == user_id)
+            .first()
+        )
+        session.delete(exp)
+        session.commit()
+        return sendSuccess("deleted")
+    except Exception as err:
+        session.rollback()
+        return sendError("unable to delete experience")
+    finally:
+        session.close()
+
+
+@router.put("/experience", status_code=200)
+async def update_experience(request: Request, data: ExperienceData):
+    try:
+        user_id = request.state.user["id"]
+        exp = (
+            session.query(Experience)
+            .filter(Experience.id == data.id, Experience.user_id == user_id)
+            .first()
+        )
+        if exp is None:
+            return sendError("experience not found")
+
+        exp.company_name = data.company_name
+        exp.job_title = data.job_title
+        exp.start_date = data.start_date
+        exp.end_date = data.end_date
+        exp.is_remote = data.is_remote
+        exp.has_completed = data.has_completed
+        exp.tasks = data.tasks
+        session.commit()
+        return sendSuccess("saved")
+    except Exception as err:
+        session.rollback()
+        print(err)
+        sendError("unable to update experience")
+    finally:
+        session.close()
+
+
+class EducationData(BaseModel):
+    id: Optional[int] = None
+    program: str
+    institution: str
+    start_date: datetime.date
+    end_date: Optional[datetime.date] = None
+    has_completed: bool = False
+
+
+@router.put("/education")
+def update_education(request: Request, data: EducationData):
+    try:
+        user_id = request.state.user["id"]
+        edu = (
+            session.query(Education)
+            .filter(Education.id == data.id, Education.user_id == user_id)
+            .first()
+        )
+        if edu is None:
+            return sendError("not found")
+        edu.program = data.program
+        edu.institution = data.institution
+        edu.start_date = data.start_date
+        edu.end_date = data.end_date
+        edu.has_completed = data.has_completed
+        session.commit()
+        return sendSuccess("updated")
+
+    except Exception as err:
+        session.rollback()
+        return sendError("uanle to update education")
+    finally:
+        session.close()
+
+
+@router.delete("/education/{id}")
+def delete_education(request: Request, id: str):
+    try:
+        user_id = request.state.user["id"]
+        edu = (
+            session.query(Education)
+            .filter(Education.id == id, Education.user_id == user_id)
+            .first()
+        )
+        if edu is None:
+            return sendError("not found")
+        session.delete(edu)
+        session.commit()
+
+        return sendSuccess("deleted")
+    except Exception as err:
+        session.rollback()
+        return sendError("uanle to update education")
+    finally:
+        session.close()
+
+
+@router.post("/education")
+def add_education(request: Request, data: EducationData):
+    ed = Education()
+
+    ed.user_id = request.state.user["id"]
+    ed.program = data.program
+    ed.institution = data.institution
+    ed.start_date = data.start_date
+    ed.end_date = data.end_date
+    ed.has_completed = data.has_completed
+
+    try:
+        session.add(ed)
+        session.commit()
+        return sendSuccess(ed)
+    except Exception as err:
+        session.rollback()
+        return sendError("unable to add education")
+    finally:
+        session.close()
+
+
+@router.get("/skill")
+async def get_skills(request: Request):
+    try:
+        res = (
+            session.query(Skill)
+            .join(JobSeekerSkill)
+            .filter(JobSeekerSkill.user_id == request.state.user["id"])
+            .all()
+        )
+        return sendSuccess(res)
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+
+@router.get("/skills")
+async def get_all_skills(request: Request):
+    q = request.query_params.get("q")
+    # serrch
+    try:
+        query = session.query(Skill)
+        if q is not None:
+            query = query.filter(Skill.lower.ilike("%{}%".format(q.lower())))
+        res = query.limit(50).all()
+
+        return sendSuccess(list(map(lambda x: {"id": x.id, "name": x.name}, res)))
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+
+@router.get("/recommend_skills")
+async def recommend_skills(request: Request, min_match_score: int = 40, limit: int = 20):
+
+    try:
+        user_id = request.state.user["id"]
+
+        job_service = JobCourseMatchingService(session)
+
+        job_recommendations = job_service.get_recommended_jobs(
+            user_id=user_id, min_match_score=min_match_score, limit=limit)
+
+        skills_data = job_service.extract_skills_from_job_recommendations(
+            job_recommendations)
+
+        # Convert skills to single list with name and type
+        all_skills = []
+
+        # Add missing skills
+        for skill in skills_data.get("missing_skills", []):
+            all_skills.append({"name": skill, "type": "missing_skill"})
+
+        # Add user skills
+        for skill in skills_data.get("user_skills", []):
+            all_skills.append({"name": skill, "type": "user_skill"})
+
+        return sendSuccess(all_skills)
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError(
+            "unable to fetch skills", status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    finally:
+        session.close()
+
+# skill model for request body
+
+
+class SkillData(BaseModel):
+    skills: List[int]
+
+
+@router.post("/skill")
+async def add_skill(request: Request, data: SkillData):
+    user_id = request.state.user["id"]
+    try:
+        exist = (
+            session.query(JobSeekerSkill)
+            .filter(JobSeekerSkill.user_id == user_id)
+            .all()
+        )
+        for i in exist:
+            session.delete(i)
+        for skill_id in data.skills:
+            count = session.query(Skill).filter(Skill.id == skill_id).count()
+            if count > 0:
+                print("adding ", skill_id, " to ", user_id)
+                sk = JobSeekerSkill()
+                sk.skill_id = skill_id
+                sk.user_id = user_id
+                session.add(sk)
+
+        session.commit()
+        return sendSuccess("skills uploaded")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+# TODO: remove
+class SkillCreate(BaseModel):
+    skills: List[str]
+
+
+@router.post("/create_skill", status_code=status.HTTP_201_CREATED)
+async def create_skill(data: SkillCreate):
+    try:
+        for name in data.skills:
+            existing_skill = session.query(
+                Skill).filter(Skill.name == name).count()
+            if existing_skill < 1:
+                sk = Skill(name)
+                session.add(sk)
+                session.commit()
+
+        return sendSuccess("created")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
+
+
+class UpdateProfile(BaseModel):
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
+    about: Optional[str] = None
+    location: Optional[str] = None
+    portfolio: Optional[str] = None
+    languages: Optional[List[str]] = None
+
+
+@router.put("/profile")
+async def update_profile(request: Request, data: UpdateProfile):
+    # print(data)
+    try:
+        user = session.query(User).filter(
+            User.id == request.state.user["id"]).first()
+        profile = (
+            session.query(JobSeeker).filter(
+                JobSeeker.id == user.profile_id).first()
+        )
+        if data.name is not None:
+            user.name = data.name
+        if data.about is not None:
+            profile.about = data.about
+        if data.location is not None:
+            profile.location = data.location
+        if data.portfolio is not None:
+            profile.portfolio = data.portfolio
+        if data.languages is not None:
+            profile.languages = data.languages
+
+        session.commit()
+        return sendSuccess("Profile updated successfully")
+
+    except Exception as err:
+        session.rollback()
+        print(err)
+        return sendError("internal server error", 500)
+    finally:
+        session.close()
+
+
+@router.post("/image", status_code=status.HTTP_201_CREATED)
+async def upload_image(img: UploadFile, request: Request):
+    user_id = request.state.user["id"]
+    try:
+        user = session.query(User).filter(User.id == user_id).first()
+        # if user.profile_image is not None:
+        #     file_delete = session.query(File).filter(File.filename).first()
+        #     session.delete(file_delete)
+        # http://143.198.235.166:3000/
+        new_file = await img.read()
+        fileSha = getSha(new_file)
+        ex_chunk = img.filename.split(".")
+        ext = ex_chunk[len(ex_chunk) - 1:][0]
+        filename = str(uuid.uuid4()) + "." + ext
+        print(filename, ext, sep=" |  ")
+        dbImg = File(
+            data=new_file, filename=filename, type=img.content_type, sha=fileSha
+        )
+        session.add(dbImg)
+        user.profile_image = filename
+
+        session.commit()
+        return sendSuccess("uploaded")
+    except Exception as err:
+        session.rollback()
+        return sendError(err.args)
+    finally:
+        session.close()
 
 
 class DeleteResume(BaseModel):
@@ -1423,7 +1765,7 @@ async def get_external_jobs(request: Request):
 
     try:
         query = session.query(ExternalJob).filter(
-            ExternalJob.is_active == True)
+            ExternalJob.is_active.is_(True))
 
         if source_q:
             query = query.filter(ExternalJob.source == source_q)

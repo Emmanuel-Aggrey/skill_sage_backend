@@ -22,7 +22,7 @@ POSTGRES_URL = config.get('POSTGRES_URL')
 
 engine = create_engine(POSTGRES_URL, echo=False)
 
-session = Session(bind=engine, autoflush=False, autocommit=False)
+session: Session = Session(bind=engine, autoflush=False, autocommit=False)
 
 
 class Base(DeclarativeBase):

@@ -185,7 +185,7 @@ async def create_bookmark(job_id: int, request: Request):
         job = session.query(Bookmark).filter(Bookmark.job_id == job_id).first()
 
         if job is not None:
-            return sendError("already exists")
+            return sendSuccess("already bookmarked")
 
         bk = Bookmark()
         bk.user_id = user_id

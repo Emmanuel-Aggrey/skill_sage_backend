@@ -160,3 +160,4 @@ class UserResume(Base):
     filename = mapped_column(String())
     resume_text = mapped_column(String())
     llm_insights = mapped_column(JSON())
+    # career_insights = mapped_column(JSON())

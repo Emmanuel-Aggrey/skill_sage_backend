@@ -173,13 +173,18 @@ class MatchingCacheManager:
         query.update({MatchCache.is_valid: False})
         self.session.commit()
 
-    def cleanup_expired_cache(self):
-        """Remove expired cache entries"""
-        expired_count = self.session.query(MatchCache).filter(
+    def cleanup_expired_cache(self, user_id: int = None):
+        """Cleanup expired cache entries"""
+        query = self.session.query(MatchCache).filter(
             MatchCache.expires_at <= datetime.utcnow()
-        ).delete()
+        )
 
+        if user_id is not None:
+            query = query.filter(MatchCache.user_id == user_id)
+
+        expired_count = query.delete(synchronize_session=False)
         self.session.commit()
+
         return expired_count
 
     def get_cache_stats(self, user_id: int = None) -> Dict[str, Any]:
@@ -351,6 +356,7 @@ class OptimizedMatchingService:
         ).order_by(MatchCache.match_score.desc()).limit(limit * 2).all()
 
         recommendations = []
+
         for cached in cached_matches:
             try:
                 match_data = json.loads(cached.data)
@@ -507,7 +513,7 @@ class EnhancedMatchingController:
                 user_id)
 
             all_items = []
-            if should_refresh:
+            if force_refresh:
                 # Clear cache and regenerate matches
                 self.cache_manager.invalidate_user_cache(
                     user_id, [f"{item_type}_match"])
@@ -517,10 +523,12 @@ class EnhancedMatchingController:
                     from models import Job, ExternalJob
                     internal_jobs = self.session.query(Job).all()
                     external_jobs = self.session.query(ExternalJob).filter(
-                        ExternalJob.is_active == True, ExternalJob.is_enabled == True
+                        ExternalJob.is_active.is_(True),
+                        ExternalJob.is_enabled.is_(True)
                     ).all()
 
                     all_items = []
+
                     # Convert internal jobs
                     for job in internal_jobs:
                         all_items.append({
@@ -548,7 +556,7 @@ class EnhancedMatchingController:
                 elif item_type == 'course':
                     from models import Course
                     courses = self.session.query(Course).filter(
-                        Course.isActive == True).all()
+                        Course.isActive.is_(True)).all()
 
                     all_items = []
                     for course in courses:
@@ -586,10 +594,10 @@ class EnhancedMatchingController:
                 "performance_stats": self.performance_monitor.get_stats()
             }
 
-    def cleanup_and_optimize(self):
+    def cleanup_and_optimize(self, user_id: int = None):
         """Perform cleanup and optimization tasks"""
         # Clean expired cache
-        expired_count = self.cache_manager.cleanup_expired_cache()
+        expired_count = self.cache_manager.cleanup_expired_cache(user_id)
 
         # Get cache statistics
         cache_stats = self.cache_manager.get_cache_stats()
