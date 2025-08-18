@@ -7,6 +7,7 @@ from decouple import config
 
 logging.basicConfig(level=logging.INFO)
 
+
 scheduler = BackgroundScheduler()
 BASE_URL = config("BASE_URL")
 

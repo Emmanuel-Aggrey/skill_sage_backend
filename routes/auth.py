@@ -20,6 +20,7 @@ class RegisterData(BaseModel):
     name: str
     email: EmailStr
     password: constr(min_length=6)
+    role: str = Role.JOB_SEEKER
 
 
 # token_db = set()
@@ -35,7 +36,7 @@ async def register(request: Request, data: RegisterData):
         password = data.password.encode("utf-8")
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
         user = User(data.name, data.email, bytes.decode(
-            hashed_password, "utf-8"), Role.JOB_SEEKER)
+            hashed_password, "utf-8"), role=data.role)
         try:
             profile = JobSeeker()
             session.add(profile)
