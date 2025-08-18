@@ -388,16 +388,6 @@ async def get_user_recommendations(request: Request,  min_match_score: int = 40,
     """Get user's recommended jobs"""
     user_id = request.state.user["id"]
 
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-    print('recommendations', user_id)
-
     try:
         controller = get_enhanced_controller(session)
         matching_service = JobCourseMatchingService(
@@ -1310,10 +1300,7 @@ async def recommend_skills(request: Request, min_match_score: int = 40, limit: i
             job_recommendations)
 
         # Convert skills to single list with name and type
-        all_skills = [
-            {"name": "SQL", "type": "missing_skill"},
-            {"name": "JavaScript", "type": "missing_skill"}
-        ]
+        all_skills = []
 
         # Add missing skills
         for skill in skills_data.get("missing_skills", []):
