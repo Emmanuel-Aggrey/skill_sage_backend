@@ -55,7 +55,7 @@ class BaseLLMClient:
                             if last_line.startswith("Total calls:"):
                                 self.call_counts[i] = int(
                                     last_line.split(":")[1].strip())
-                except:
+                except Exception:
                     self.call_counts[i] = 0
 
     def _log_api_call(self, key_index, success=True):
@@ -66,18 +66,42 @@ class BaseLLMClient:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         status = "SUCCESS" if success else "FAILED"
 
-        with open(log_file, 'a') as f:
-            f.write(
-                f"{timestamp} - Call #{self.call_counts[key_index]} - {status}\n")
-            f.write(f"Total calls: {self.call_counts[key_index]}\n")
+        try:
+            with open(log_file, 'a') as f:
+                f.write(
+                    f"{timestamp} - Call #{self.call_counts[key_index]} - {status}\n")
+                f.write(f"Total calls: {self.call_counts[key_index]}\n")
+        except Exception as e:
+            print(f"Warning: Could not write to log file: {e}")
 
-    def _next_key(self):
+    def _get_next_available_key(self):
+        """Find the next available key that hasn't failed"""
+        available_keys = [i for i in range(
+            len(self.api_keys)) if i not in self.failed_keys]
+
+        if not available_keys:
+            return None
+
+        # Find next key after current, or first available if current is last
+        current_index = None
+        for i, key_idx in enumerate(available_keys):
+            if key_idx == self.current_key:
+                current_index = i
+                break
+
+        if current_index is not None and current_index + 1 < len(available_keys):
+            return available_keys[current_index + 1]
+        else:
+            # Return first available key (cycling back)
+            return available_keys[0] if available_keys[0] != self.current_key else None
+
+    def _switch_to_next_key(self):
         """Switch to next available key"""
-        for _ in range(len(self.api_keys)):
-            self.current_key = (self.current_key + 1) % len(self.api_keys)
-            if self.current_key not in self.failed_keys:
-                print(f"🔄 Switched to key #{self.current_key + 1}")
-                return True
+        next_key = self._get_next_available_key()
+        if next_key is not None:
+            self.current_key = next_key
+            print(f"🔄 Switched to key #{self.current_key + 1}")
+            return True
         return False
 
     def query_llm(self, prompt):
@@ -92,16 +116,23 @@ class BaseLLMClient:
         # Check if all keys failed
         if len(self.failed_keys) >= len(self.api_keys):
             message = f"❌ All {len(self.api_keys)} API keys exhausted"
+            print(message)
             sendError(message)
             raise Exception(message)
 
-        # Try each key
-        for attempt in range(len(self.api_keys) + 2):
+        # Allow more attempts for retries
+        max_attempts = len(self.api_keys) * 2
+
+        for attempt in range(max_attempts):
             try:
                 # Skip failed keys
                 if self.current_key in self.failed_keys:
-                    if not self._next_key():
+                    if not self._switch_to_next_key():
                         break
+                    continue
+
+                print(
+                    f"🔄 Attempting with key #{self.current_key + 1} (attempt {attempt + 1})")
 
                 # Make request
                 payload = {"contents": [{"parts": [{"text": prompt}]}]}
@@ -114,53 +145,101 @@ class BaseLLMClient:
                 response = requests.post(self.api_url, headers=headers,
                                          data=json.dumps(payload), timeout=120)
 
-                # Log the API call attempt
-                success = response.status_code == 200
-                self._log_api_call(self.current_key, success)
-
-                # Handle response
+                # Handle successful response
                 if response.status_code == 200:
                     result = response.json()
                     print(
-                        f"✅ Success with key #{self.current_key + 1} attempts {attempt + 1}")
+                        f"✅ Success with key #{self.current_key + 1} on attempt {attempt + 1}")
+
+                    # Log successful call
+                    self._log_api_call(self.current_key, True)
 
                     return result['candidates'][0]['content']['parts'][0]['text'].strip()
 
+                # Handle quota exceeded
                 elif response.status_code == 429:
                     message = f"🚫 Key #{self.current_key + 1} quota exceeded"
                     print(message)
-                    sendError(message)
-                    self.failed_keys.add(self.current_key)
-                    if not self._next_key():
-                        break
-                    continue
 
+                    # Log failed call and mark key as failed
+                    self._log_api_call(self.current_key, False)
+                    self.failed_keys.add(self.current_key)
+
+                    # Try to switch to next key
+                    if self._switch_to_next_key():
+                        continue
+                    else:
+                        # No more keys available
+                        break
+
+                # Handle other HTTP errors
                 else:
-                    response.raise_for_status()
+                    self._log_api_call(self.current_key, False)
+                    error_message = f"HTTP {response.status_code}: {response.text[:100]}"
+                    print(
+                        f"❗ Key #{self.current_key + 1} error: {error_message}")
+
+                    # For non-quota errors, try next key but don't mark current as permanently failed
+                    if self._switch_to_next_key():
+                        time.sleep(1)  # Brief pause before retry
+                        continue
+                    else:
+                        raise Exception(f"Request failed: {error_message}")
+
+            except requests.RequestException as e:
+                # Network/request errors
+                self._log_api_call(self.current_key, False)
+                error_message = f"Request error with key #{self.current_key + 1}: {str(e)[:100]}"
+                print(error_message)
+
+                # Try next key for network errors
+                if self._switch_to_next_key():
+                    time.sleep(2)  # Longer pause for network issues
+                    continue
+                else:
+                    raise Exception(error_message)
 
             except Exception as e:
-                # Log failed call
+                # Other unexpected errors
                 self._log_api_call(self.current_key, False)
+                error_message = f"Unexpected error with key #{self.current_key + 1}: {str(e)[:100]}"
+                print(error_message)
 
-                message = f"❗ Error with key #{self.current_key + 1}: {str(e)[:50]}"
-                print(message)
-                sendError(message)
-                if attempt < len(self.api_keys):
-                    if not self._next_key():
-                        break
+                # Try next key
+                if attempt < max_attempts - 1 and self._switch_to_next_key():
                     time.sleep(1)
                     continue
-                raise e
-        message = f"💥 Failed after trying all {len(self.api_keys)} keys"
+                else:
+                    raise Exception(error_message)
+
+        # If we get here, all attempts failed
+        message = f"💥 Failed after {max_attempts} attempts across all available keys"
+        print(message)
         sendError(message)
         raise Exception(message)
 
     def stats(self):
         """Show current stats including call counts"""
         active = len(self.api_keys) - len(self.failed_keys)
+        failed_keys_list = [f"#{i+1}" for i in self.failed_keys]
         call_info = ", ".join(
             [f"Key #{i+1}: {self.call_counts[i]} calls" for i in range(len(self.api_keys))])
-        return f"📊 Keys: {active}/{len(self.api_keys)} active, current: #{self.current_key + 1} | {call_info}"
+
+        status = f"📊 Keys: {active}/{len(self.api_keys)} active, current: #{self.current_key + 1}"
+        if failed_keys_list:
+            status += f", failed: {', '.join(failed_keys_list)}"
+        status += f" | {call_info}"
+
+        return status
+
+    def reset_failed_keys(self):
+        """Reset failed keys (useful for testing or if quotas reset)"""
+        self.failed_keys.clear()
+        print("🔄 Reset all failed keys")
+
+    def get_available_keys(self):
+        """Get list of available (non-failed) keys"""
+        return [i for i in range(len(self.api_keys)) if i not in self.failed_keys]
 
 
 llm_client = BaseLLMClient()
