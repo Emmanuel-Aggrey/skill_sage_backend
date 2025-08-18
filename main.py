@@ -7,12 +7,28 @@ from routes.courses import router as c_router, app_router as c2_router
 from routes.job import router as j_router, app_router as j2_router
 from routes.youtube_routes import router as yt_router
 from dotenv import load_dotenv
+from ping_render import lifespan
 
-app = FastAPI()
 
 load_dotenv()
 initDB()
 
+
+origins = [
+    "http://localhost:3000",
+    # "https://skill-sage.netlify.app"
+]
+
+
+app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=origins,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(j2_router)
 app.include_router(c2_router)
@@ -22,18 +38,6 @@ app.include_router(auth_router)
 app.include_router(router)
 app.include_router(app_router)
 app.include_router(yt_router)
-
-origins = [
-    "http://localhost:3000",
-    # "https://skill-sage.netlify.app"
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 @app.get("/")
