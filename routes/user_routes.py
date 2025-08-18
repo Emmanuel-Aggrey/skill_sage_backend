@@ -1,8 +1,4 @@
-# from services.matching_cache_manager import (
-#     EnhancedMatchingController, MatchingSystemConfig, MatchingCacheManager,
-#     OptimizedMatchingService, PerformanceMonitor, create_cache_tables
-# )
-# from enhanced_matching_system import GenericLLMProcessor, JobCourseMatchingService, UserProfile
+
 import email
 from pydantic import BaseModel, EmailStr
 
@@ -20,7 +16,7 @@ from models.user import (
 from models.job import Job, JobMatch, UserJobPreferences, ExternalJob, ExternalJobMatch, Course
 from .helpers import sendError, sendSuccess, getSha
 from .middlewares import with_authentication
-from db.connection import session, recommend
+from db.connection import session
 from fastapi import APIRouter, Request, Depends, status, UploadFile, Response, BackgroundTasks, Query
 from typing import List, Optional, Dict, Any
 import datetime
@@ -28,20 +24,17 @@ import datetime
 import uuid
 import copy
 from fastapi.responses import JSONResponse
-
-
-# from services.llm_skils_strapper import GenericLLMProcessor, JobCourseMatchingService, UserProfile
-
-
+from models.job import Bookmark
+from sqlalchemy import func
 from services.enhanced_matching_system import GenericLLMProcessor, JobCourseMatchingService, UserProfile
 from services.matching_cache_manager import (
-    EnhancedMatchingController, MatchingSystemConfig, MatchingCacheManager,
-    OptimizedMatchingService, PerformanceMonitor, create_cache_tables, UserMatchingPreferences
+    EnhancedMatchingController, MatchingSystemConfig, UserMatchingPreferences
 )
 
 
 def get_enhanced_controller(session) -> EnhancedMatchingController:
     """Dependency to get enhanced matching controller"""
+
     llm_processor = GenericLLMProcessor()
     return EnhancedMatchingController(session, llm_processor)
 
@@ -80,7 +73,7 @@ async def get_user(request: Request):
         user = session.query(User).join(
             User.profile).filter(User.id == user_id).first()
         if user is None:
-            return sendError(":lol")
+            return sendError("user not found")
         education = session.query(Education).filter(
             Education.user_id == user_id).all()
         exp = session.query(Experience).filter(
@@ -110,6 +103,12 @@ async def get_user(request: Request):
             UserResume.user_id == user_id
         ).order_by(UserResume.id.desc()).all()  # Order by latest first
 
+        bookmark_count = (
+            session.query(func.count(Bookmark.id))
+            .filter(Bookmark.user_id == user_id)
+            .scalar()
+        )
+
         for i in links:
             resume_links.append(base_url + "file/" + i.filename)
             if i.llm_insights:
@@ -118,8 +117,10 @@ async def get_user(request: Request):
         user.skills = skills
         user.resume = resume_links
         user.llm_insights = llm.parse_json_output(latest_llm_insights)
+        user.bookmark_count = bookmark_count
 
         u = copy.copy(user)
+
         if user.profile_image is not None:
             img = user.profile_image
             u.profile_image = base_url + "file/" + img
@@ -600,7 +601,8 @@ async def get_detailed_match_analysis_v2(
                     "id": job.id, "title": job.title, "company": job.company,
                     "description": job.description, "skills": job.skills or [],
                     "requirements": job.requirements or [], "salary": job.salary,
-                    "location": job.location, "type": job.type
+                    "location": job.location, "type": job.type,
+                    "mode": "job"
                 }
         elif item_type == "external_job":
             job = session.query(ExternalJob).filter(
@@ -611,7 +613,8 @@ async def get_detailed_match_analysis_v2(
                     "description": job.description or "", "skills": job.skills or [],
                     "salary_min": job.salary_min, "salary_max": job.salary_max,
                     "location": job.location, "job_type": job.job_type,
-                    "apply_url": job.apply_url, "source": job.source
+                    "apply_url": job.apply_url, "source": job.source,
+                    "mode": "external_job"
                 }
         elif item_type == "course":
             course = session.query(Course).filter(Course.id == item_id).first()
@@ -682,22 +685,31 @@ async def generate_improvement_plan(user_profile: UserProfile, missing_skills: L
                                     item_data: Dict, item_type: str) -> Dict[str, Any]:
     """Generate personalized improvement plan"""
     try:
-        llm = GenericLLMProcessor()
 
         plan_prompt = f"""
             Create a personalized improvement plan for this user to increase their match score for this {item_type}.
             
-            User's Current Skills: {', '.join(user_profile.skills)}
+            User's Current Skills: {', '.join(user_profile.skills) if user_profile.skills else 'None'}
             Missing Skills Needed: {', '.join(missing_skills)}
             Target {item_type.title()}: {item_data.get('title', 'Unknown')}
             
-            Provide a structured improvement plan in JSON format:
+            Provide a structured improvement plan in JSON format with the following exact structure:
+            ```json
             {{
-                "improvement_steps": ["step1", "step2", "step3"],
-                "estimated_time": "3 months",
-                "resources": ["resource1", "resource2"]
-            }}
-            """
+                "improvement_steps": [
+                    {{
+                        "step_number": 1,
+                        "title": "Step Title",
+                        "description": "Detailed description of the step",
+                        "estimated_time": "Duration (e.g., 2 weeks)",
+                        "resources": ["Resource 1", "Resource 2"],
+                        "skills_to_acquire": ["Skill 1", "Skill 2"]
+                    }},
+                    ...
+                ],
+                "estimated_time": "Total duration (e.g., 3 months)",
+                "resources": ["General Resource 1", "General Resource 2"]
+            }}"""
 
         # Use custom_prompt instead of prompt_template
         plan_response = llm.query_llm_with_template(
@@ -870,7 +882,6 @@ async def extract_skills_from_job_recommendations(request: Request, min_match_sc
 
 @router.post("/refresh_all_matches")
 async def refresh_all_user_matches(request: Request, background_tasks: BackgroundTasks):
-    """Refresh all matches for the user (jobs, external jobs, courses)"""
     user_id = request.state.user["id"]
 
     try:
@@ -1299,7 +1310,10 @@ async def recommend_skills(request: Request, min_match_score: int = 40, limit: i
             job_recommendations)
 
         # Convert skills to single list with name and type
-        all_skills = []
+        all_skills = [
+            {"name": "SQL", "type": "missing_skill"},
+            {"name": "JavaScript", "type": "missing_skill"}
+        ]
 
         # Add missing skills
         for skill in skills_data.get("missing_skills", []):

@@ -9,6 +9,7 @@ from .helpers import sendError, sendSuccess
 from typing import List, Optional
 import datetime
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 
 router = APIRouter(
     prefix="/job",
@@ -185,6 +186,7 @@ async def create_bookmark(job_id: int, request: Request):
         job = session.query(Bookmark).filter(Bookmark.job_id == job_id).first()
 
         if job is not None:
+
             return sendSuccess("already bookmarked")
 
         bk = Bookmark()
@@ -199,6 +201,24 @@ async def create_bookmark(job_id: int, request: Request):
         return sendError(err.args)
     finally:
         session.close()
+
+
+# @app_router.get("/bookmarks/count")
+# async def get_bookmark_count(request: Request):
+#     user_id = request.state.user["id"]
+#     try:
+#         bookmark_count = (
+#             session.query(func.count(Bookmark.id))
+#             .filter(Bookmark.user_id == user_id)
+#             .scalar()
+#         )
+
+#         return sendSuccess(bookmark_count)
+#     except Exception as err:
+#         print(err)
+#         return sendError(err.args)
+#     finally:
+#         session.close()
 
 
 @app_router.get("/bookmarks")
@@ -270,7 +290,7 @@ async def apply_for_job(job_id: int, request: Request):
         )
 
         if job:
-            return sendError("already applied")
+            return sendSuccess("already applied")
 
         ap = JobApplication()
         ap.user_id = user_id
