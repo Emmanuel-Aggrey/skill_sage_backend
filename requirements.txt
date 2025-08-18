@@ -27,6 +27,7 @@ packaging==23.1
 psycopg2==2.9.7
 psycopg2-binary>=2.9.7
 pydantic>=2.5.0,<3.0
+apscheduler==3.10.4
 
 PyJWT==2.7.0
 PyPDF2==3.0.1
