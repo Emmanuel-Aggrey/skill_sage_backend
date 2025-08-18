@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from models.job import JobMatch, ExternalJob, ExternalJobMatch, Job
 from db.connection import session
 import html
+from datetime import datetime
 
 
 class VideoRequest(BaseModel):
@@ -163,8 +164,13 @@ class YouTubeService:
                 "url": f"https://www.youtube.com/watch?v={item['id']}",
                 "duration": f"{duration//60}:{duration % 60:02d}",
                 "view_count": int(item['statistics'].get('viewCount', 0)),
+                "like_count": int(item['statistics'].get('likeCount', 0)),
+                "published_date": self.readable_date(item['snippet']['publishedAt']),
                 "channel_name": item['snippet']['channelTitle'],
                 "skill": skill,
                 "level": level
             })
         return videos
+
+    def readable_date(self, date_str):
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00')).strftime("%b %d, %Y")

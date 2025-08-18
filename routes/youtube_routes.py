@@ -44,8 +44,6 @@ async def get_videos_by_filter(
 ):
     """Get YouTube videos based on user skills and match scores for intelligent level detection"""
 
-    print('skill skill ', skill)
-
     video_request = VideoRequest(
         level=level,
         max_total_videos=max_videos,
