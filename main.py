@@ -17,11 +17,12 @@ initDB()
 
 origins = [
     "http://localhost:3000",
+    "http://localhost:3001",
     BASE_URL,
     FRONTEND_URL,
-
+    "https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app",
+    "https://skill-sage-dashboard-updated.onrender.com",
 ]
-
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(

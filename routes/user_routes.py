@@ -189,10 +189,6 @@ async def upload_resume_v2(
         ext = ex_chunk[-1]
         filename = str(uuid.uuid4()) + "." + ext
 
-        # Initialize enhanced processor
-        # llm = GenericLLMProcessor()
-        # controller = get_enhanced_controller(session)
-
         # Create comprehensive user profile
         user_profile = llm.create_user_profile(user_id, new_file, 'pdf')
 
