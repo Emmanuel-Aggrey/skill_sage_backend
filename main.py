@@ -18,15 +18,16 @@ initDB()
 origins = [
     "http://localhost:3000",
     BASE_URL,
-    FRONTEND_URL
+    FRONTEND_URL,
+
 ]
 
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -41,9 +42,9 @@ app.include_router(app_router)
 app.include_router(yt_router)
 
 
-@app.get("/")
-def hello_world():
-    return "Hello"
+# @app.get("/")
+# def hello_world():
+#     return "Hello"
 
 
 @app.get("/healthcheck")
