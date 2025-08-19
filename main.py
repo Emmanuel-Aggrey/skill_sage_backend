@@ -8,6 +8,7 @@ from routes.job import router as j_router, app_router as j2_router
 from routes.youtube_routes import router as yt_router
 from dotenv import load_dotenv
 from ping_render import lifespan
+from settings import BASE_URL
 
 
 load_dotenv()
@@ -16,15 +17,14 @@ initDB()
 
 origins = [
     "http://localhost:3000",
-    # "https://skill-sage.netlify.app"
+    BASE_URL
 ]
 
 
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=origins,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
