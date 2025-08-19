@@ -25,8 +25,8 @@ origins = [
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins='*',
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -44,3 +44,8 @@ app.include_router(yt_router)
 @app.get("/")
 def hello_world():
     return "Hello"
+
+
+@app.get("/healthcheck")
+def healthcheck():
+    return "OK"
