@@ -8,7 +8,7 @@ from routes.job import router as j_router, app_router as j2_router
 from routes.youtube_routes import router as yt_router
 from dotenv import load_dotenv
 from ping_render import lifespan
-from settings import BASE_URL
+from settings import BASE_URL, FRONTEND_URL
 
 
 load_dotenv()
@@ -17,7 +17,8 @@ initDB()
 
 origins = [
     "http://localhost:3000",
-    BASE_URL
+    BASE_URL,
+    FRONTEND_URL
 ]
 
 
