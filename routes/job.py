@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi import APIRouter, Request, Depends, status, UploadFile, Response
 from .middlewares import with_authentication
 from models.user import Role, UserResume, JobSeekerSkill
@@ -159,14 +160,11 @@ async def get_jobs():
 
 @router.delete("/{job_id}")
 async def delete_job(job_id: int, request: Request):
-    user_id = request.state.user["id"]
+    # user_id = request.state.user["id"]
     try:
         job = session.query(Job).filter(Job.id == job_id).first()
         if job is None:
             return sendError("Job not found")
-
-        if job.user_id != user_id:
-            return sendError("You do not have permission to delete this job")
 
         session.delete(job)
         session.commit()
@@ -179,60 +177,84 @@ async def delete_job(job_id: int, request: Request):
         session.close()
 
 
-@app_router.post("/bookmark/{job_id}")
-async def create_bookmark(job_id: int, request: Request):
-    user_id = request.state.user["id"]
+@app_router.post("/bookmark/{item_id}")
+async def create_bookmark(item_id: str, request: Request):
+    user_id = 2  # request.state.user["id"]
+
     try:
-        job = session.query(Bookmark).filter(Bookmark.job_id == job_id).first()
+        # Try to parse item_id as int to check if it's an internal job
+        try:
+            internal_id = int(item_id)
+            job = session.query(Job).filter(Job.id == internal_id).first()
+            if job:
+                # Check if already bookmarked as internal
+                existing = session.query(Bookmark).filter(
+                    Bookmark.job_id == internal_id,
+                    Bookmark.user_id == user_id,
+                ).first()
 
-        if job is not None:
+                if existing:
+                    return sendSuccess("already bookmarked")
 
+                # Create internal bookmark
+                bk = Bookmark(
+                    user_id=user_id,
+                    job_id=internal_id,
+                    created=datetime.datetime.now()
+                )
+                session.add(bk)
+                session.commit()
+                return sendSuccess("created")
+        except ValueError:
+            # Not an integer => external job
+            pass
+
+        # If we reach here, it's an external job
+        existing = session.query(Bookmark).filter(
+            Bookmark.external_job_id == item_id,
+            Bookmark.user_id == user_id
+        ).first()
+
+        if existing:
             return sendSuccess("already bookmarked")
 
-        bk = Bookmark()
-        bk.user_id = user_id
-        bk.job_id = job_id
+        # Create external bookmark
+        bk = Bookmark(
+            user_id=user_id,
+            external_job_id=item_id,
+            created=datetime.datetime.now()
+        )
         session.add(bk)
         session.commit()
         return sendSuccess("created")
+
     except Exception as err:
         session.rollback()
-        print(err)
-        return sendError(err.args)
+        print(f"Error: {err}")
+        return sendError("Something went wrong.")
     finally:
         session.close()
-
-
-# @app_router.get("/bookmarks/count")
-# async def get_bookmark_count(request: Request):
-#     user_id = request.state.user["id"]
-#     try:
-#         bookmark_count = (
-#             session.query(func.count(Bookmark.id))
-#             .filter(Bookmark.user_id == user_id)
-#             .scalar()
-#         )
-
-#         return sendSuccess(bookmark_count)
-#     except Exception as err:
-#         print(err)
-#         return sendError(err.args)
-#     finally:
-#         session.close()
 
 
 @app_router.get("/bookmarks")
 async def get_user_bookmarks(request: Request):
     user_id = request.state.user["id"]
+
     try:
+        # Only get internal job bookmarks (the ones that have job_id)
         bookmarks = (
-            session.query(Job).join(Bookmark).filter(
-                Bookmark.user_id == user_id).all()
+            session.query(Job, Bookmark)
+            .join(Bookmark, Job.id == Bookmark.job_id)
+            .filter(Bookmark.user_id == user_id)
+            .all()
         )
+
         bookmark_list = []
-        for job in bookmarks:
+        for job, bookmark in bookmarks:
+            # Use bookmark.job_id if available, otherwise bookmark.external_job_id
+            key = bookmark.job_id if bookmark.job_id else bookmark.external_job_id
             bk_dict = {
-                "id": job.id,
+                "id": key,
                 "title": job.title,
                 "location": job.location,
                 "expiry": job.expiry,
@@ -250,31 +272,40 @@ async def get_user_bookmarks(request: Request):
     except Exception as err:
         session.rollback()
         print(err)
-        return sendError(err.args)
+        return sendError(str(err))
     finally:
         session.close()
 
 
-@app_router.delete("/bookmarks/{job_id}")
-async def delete_bookmark(job_id: int, request: Request):
+@app_router.delete("/bookmarks/{item_id}")
+async def delete_bookmark(item_id: str, request: Request):
     user_id = request.state.user["id"]
+
     try:
-        bookmark = (
-            session.query(Bookmark)
-            .filter(Bookmark.user_id == user_id, Bookmark.job_id == job_id)
-            .first()
-        )
+        try:
+            item_id_int = int(item_id)
+        except ValueError:
+            item_id_int = None
+
+        bookmark = session.query(Bookmark).filter(
+            Bookmark.user_id == user_id
+        ).filter(
+            (Bookmark.job_id == item_id_int) | (
+                Bookmark.external_job_id == item_id)
+        ).first()
 
         if bookmark is None:
-            return sendError("not found")
+            # <-- Return properly here
+            return sendSuccess("Bookmark not found")
 
         session.delete(bookmark)
         session.commit()
-        return sendSuccess("bookmark removed")
+        return sendSuccess("Bookmark removed")
+
     except Exception as err:
         session.rollback()
-        print(err)
-        return sendError(err.args)
+        print(f"Error: {err}")
+        return sendError("Something went wrong.")
     finally:
         session.close()
 

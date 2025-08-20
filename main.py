@@ -9,6 +9,8 @@ from routes.youtube_routes import router as yt_router
 from dotenv import load_dotenv
 from ping_render import lifespan
 from settings import BASE_URL, FRONTEND_URL
+from services.websocket_manager import ws_manager
+from fastapi import WebSocket, WebSocketDisconnect
 
 
 load_dotenv()
@@ -41,11 +43,22 @@ app.include_router(auth_router)
 app.include_router(router)
 app.include_router(app_router)
 app.include_router(yt_router)
+app.include_router(app_router)
 
 
 # @app.get("/")
 # def hello_world():
 #     return "Hello"
+
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await ws_manager.connect(user_id, websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ws_manager.disconnect(user_id)
 
 
 @app.get("/healthcheck")

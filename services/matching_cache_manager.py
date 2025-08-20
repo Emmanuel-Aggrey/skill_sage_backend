@@ -350,7 +350,7 @@ class OptimizedMatchingService:
         cached_matches = self.session.query(MatchCache).filter(
             MatchCache.user_id == user_id,
             MatchCache.cache_type == f"{item_type}_match",
-            MatchCache.is_valid == True,
+            # MatchCache.is_valid == True,
             MatchCache.expires_at > datetime.utcnow(),
             MatchCache.match_score >= min_score
         ).order_by(MatchCache.match_score.desc()).limit(limit * 2).all()
@@ -492,7 +492,7 @@ class EnhancedMatchingController:
         self.performance_monitor = PerformanceMonitor()
         self.llm_processor = llm_processor
 
-    def process_user_matching_request(self, user_id: int, item_type: str = 'job',
+    def process_user_matching_request(self, user_id: int, item_type,
                                       force_refresh: bool = False, limit: int = 20) -> Dict[str, Any]:
         """Process a complete user matching request with optimization"""
 

@@ -35,7 +35,8 @@ class Bookmark(Base):
     __tablename__ = "bookmarks"
     id = mapped_column(Integer(), primary_key=True, nullable=False)
     user_id = mapped_column(Integer(), ForeignKey("users.id"), nullable=False)
-    job_id = mapped_column(Integer(), ForeignKey("jobs.id"), nullable=False)
+    job_id = mapped_column(Integer(), ForeignKey("jobs.id"), nullable=True)
+    external_job_id = mapped_column(Integer())
 
 
 class JobApplication(Base):

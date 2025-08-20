@@ -30,6 +30,8 @@ from services.enhanced_matching_system import GenericLLMProcessor, JobCourseMatc
 from services.matching_cache_manager import (
     EnhancedMatchingController, MatchingSystemConfig, UserMatchingPreferences
 )
+from services.websocket_manager import ws_manager
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
 
 def get_enhanced_controller(session) -> EnhancedMatchingController:
@@ -138,21 +140,6 @@ class UpdateUser(BaseModel):
     email: EmailStr
 
 
-# @router.put("/profile")
-# async def update_profile(request: Request, data: UpdateUser):
-#     """Update user profile information"""
-#     try:
-#         user = session.query(User).filter(
-#             User.id == request.state.user["id"]).first()
-#         user.name = data.name
-#         user.email = data.email
-#         session.commit()
-#         return sendSuccess("profile updated")
-#     except Exception as err:
-#         print(err)
-#         return sendError("internal server error", 500)
-
-
 class ExperienceData(BaseModel):
     id: Optional[int] = None
     company_name: str
@@ -181,6 +168,8 @@ async def upload_resume_v2(
     Enhanced resume upload with intelligent matching and caching
     """
     user_id = request.state.user["id"]
+
+    await ws_manager.send_user_notification(str(user_id), "jobs updated")
 
     try:
         new_file = await file.read()
@@ -344,9 +333,10 @@ async def upload_resume_v2(
 async def enhanced_background_matching(user_id: int, match_threshold: float = 40.0,
                                        include_courses: bool = True, force_refresh: bool = False):
     """Enhanced background task for generating matches with caching"""
+    matching_service = JobCourseMatchingService(session)
     try:
-        controller: EnhancedMatchingController = get_enhanced_controller(
-            session)
+        # controller: EnhancedMatchingController = get_enhanced_controller(
+        #     session)
 
         # Process job matching
         job_result = controller.process_user_matching_request(
@@ -365,6 +355,16 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
                 user_id, 'course', force_refresh=force_refresh, limit=20
             )
 
+        for result in [job_result, external_job_result]:
+            recommendations = result.get('recommendations')
+            if recommendations:
+                # Get the type from the first item's `item_data['type']`
+                job_type = recommendations[0].get('item_data', {}).get('type')
+                if job_type:
+                    matches = convert_recommendations_to_match_results(
+                        recommendations, job_type)
+                    matching_service.save_job_matches(user_id, matches)
+
         print(f"Enhanced matching completed for user {user_id}:")
         print(f"  - Jobs: {len(job_result.get('recommendations', []))}")
         print(
@@ -377,6 +377,31 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
         print(f"Enhanced background matching error for user {user_id}: {e}")
     finally:
         session.close()
+
+
+# app = FastAPI()
+# app_router = APIRouter()
+
+
+def convert_recommendations_to_match_results(recommendations: List[Dict], item_type: str) -> List:
+    """Convert recommendation dictionaries back to MatchResult format for saving"""
+    from services.enhanced_matching_system import MatchResult
+
+    matches = []
+    for rec in recommendations:
+        match_result = MatchResult(
+            item_id=rec.get('item_id'),
+            item_type=item_type,
+            match_score=rec.get('match_score', 0),
+            skill_match_count=rec.get('skill_match_count', 0),
+            total_required_skills=rec.get('total_required_skills', 0),
+            missing_skills=rec.get('missing_skills', []),
+            matched_skills=rec.get('matched_skills', []),
+            item_data=rec.get('item_data', {})
+        )
+        matches.append(match_result)
+
+    return matches
 
 
 @router.get("/me/recommendations")
