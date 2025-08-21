@@ -51,7 +51,7 @@ app.include_router(app_router)
 #     return "Hello"
 
 
-@app.websocket("/ws/{user_id}")
+@app.websocket("/ws/{user_id}/")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
     await ws_manager.connect(user_id, websocket)
     try:

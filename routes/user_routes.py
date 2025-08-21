@@ -155,7 +155,7 @@ MATCHING_CONFIG = MatchingSystemConfig.load_from_env()
 
 
 @router.post("/upload_resume", status_code=status.HTTP_201_CREATED)
-async def upload_resume_v2(
+async def upload_resume(
     file: UploadFile,
     request: Request,
     background_tasks: BackgroundTasks,
@@ -168,8 +168,6 @@ async def upload_resume_v2(
     Enhanced resume upload with intelligent matching and caching
     """
     user_id = request.state.user["id"]
-
-    await ws_manager.send_user_notification(str(user_id), "jobs updated")
 
     try:
         new_file = await file.read()
@@ -376,6 +374,7 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
     except Exception as e:
         print(f"Enhanced background matching error for user {user_id}: {e}")
     finally:
+        await ws_manager.send_user_notification(str(user_id), "jobs updated")
         session.close()
 
 
