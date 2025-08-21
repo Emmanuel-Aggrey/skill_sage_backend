@@ -374,12 +374,13 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
     except Exception as e:
         print(f"Enhanced background matching error for user {user_id}: {e}")
     finally:
-        await ws_manager.send_user_notification(str(user_id), "jobs updated")
+
+        await ws_manager.send_user_notification(str(user_id),
+                                                {"type": "jobs_updated",
+                                                 "message": "Upload complete!"}
+                                                )
+
         session.close()
-
-
-# app = FastAPI()
-# app_router = APIRouter()
 
 
 def convert_recommendations_to_match_results(recommendations: List[Dict], item_type: str) -> List:

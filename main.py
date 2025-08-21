@@ -12,9 +12,18 @@ from settings import BASE_URL, FRONTEND_URL
 from services.websocket_manager import ws_manager
 from fastapi import WebSocket, WebSocketDisconnect
 
-
 load_dotenv()
 initDB()
+
+
+# origins = [
+#     "http://localhost:3000",
+#     "http://localhost:3001",
+#     BASE_URL,
+#     FRONTEND_URL,
+#     "https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app",
+#     "https://skill-sage-dashboard-updated.onrender.com",
+# ]
 
 
 origins = [
@@ -24,9 +33,16 @@ origins = [
     FRONTEND_URL,
     "https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app",
     "https://skill-sage-dashboard-updated.onrender.com",
+    "http://10.71.62.28",     # Your Flutter client IP
+    "ws://10.71.62.28",       # WebSocket from Flutter client
+    "http://10.71.62.222:8004",  # Your server
+    "ws://10.71.62.222:8004",    # WebSocket server
 ]
 
+
 app = FastAPI(lifespan=lifespan)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -53,11 +69,33 @@ app.include_router(app_router)
 
 @app.websocket("/ws/{user_id}/")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    await ws_manager.connect(user_id, websocket)
+    import logging
+    logging.warning(f"WebSocket connection attempt for user: {user_id}")
+
     try:
+        await ws_manager.connect(user_id, websocket)
+
         while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
+            try:
+                # Wait for any message from client
+                data = await websocket.receive_text()
+                print(f"Received from user {user_id}: {data}")
+
+                # Example: send JSON instead of plain text
+                await websocket.send_json({
+                    "type": "jobs_updated",
+                    "message": "Upload complete!"
+                })
+
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                print(f"WebSocket error for user {user_id}: {e}")
+                break
+
+    except Exception as e:
+        print(f"WebSocket connection error for user {user_id}: {e}")
+    finally:
         ws_manager.disconnect(user_id)
 
 
