@@ -699,11 +699,11 @@ async def generate_improvement_plan(user_profile: UserProfile, missing_skills: L
 
         plan_prompt = f"""
             Create a personalized improvement plan for this user to increase their match score for this {item_type}.
-            
+
             User's Current Skills: {', '.join(user_profile.skills) if user_profile.skills else 'None'}
             Missing Skills Needed: {', '.join(missing_skills)}
             Target {item_type.title()}: {item_data.get('title', 'Unknown')}
-            
+
             Provide a structured improvement plan in JSON format with the following exact structure:
             ```json
             {{
@@ -917,6 +917,11 @@ async def refresh_all_user_matches(request: Request, background_tasks: Backgroun
             content={"success": False, "error": str(err)}
         )
     finally:
+        await ws_manager.send_user_notification(str(user_id),
+                                                {"type": "jobs_updated",
+                                                 "message": "Upload complete!"}
+                                                )
+
         session.close()
 
 
