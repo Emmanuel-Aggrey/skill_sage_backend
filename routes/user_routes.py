@@ -924,7 +924,7 @@ async def refresh_all_user_matches(request: Request, background_tasks: Backgroun
 async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False, limit: int = 50):
     """Comprehensive background refresh of all matches"""
     try:
-        # controller = get_enhanced_controller(session)
+        controller = get_enhanced_controller(session)
 
         print(f"Starting comprehensive refresh for user {user_id}")
 
@@ -960,13 +960,14 @@ async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False,
 
         # Cleanup and optimize
         cleanup_result = controller.cleanup_and_optimize(user_id)
+
+        # await ws_manager.send_user_notification(str(user_id),
+        #                                         {"type": "jobs_updated",
+        #                                          "message": "Upload complete!"}
+        #                                         )
+
         print(
             f"  - Cache cleanup: {cleanup_result.get('expired_entries_removed', 0)} entries removed")
-
-        await ws_manager.send_user_notification(str(user_id),
-                                                {"type": "jobs_updated",
-                                                 "message": "Upload complete!"}
-                                                )
 
         return {
             "job_recommendations": job_result.get('recommendations', []),
@@ -979,46 +980,8 @@ async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False,
         print(f"Comprehensive refresh error for user {user_id}: {e}")
         return {"error": str(e)}
     finally:
+
         session.close()
-
-# async def comprehensive_match_refresh(user_id: int, force_refresh: bool = False, limit: int = 50):
-#     """Comprehensive background refresh of all matches"""
-#     try:
-#         controller = get_enhanced_controller(session)
-
-#         print(f"Starting comprehensive refresh for user {user_id}")
-
-#         # Refresh jobs
-#         job_result = controller.process_user_matching_request(
-#             user_id, 'job', force_refresh=force_refresh, limit=limit
-#         )
-
-#         # print('job_result', job_result)
-
-#         # Refresh external jobs
-#         external_result = controller.process_user_matching_request(
-#             user_id, 'external_job', force_refresh=force_refresh, limit=limit
-#         )
-
-#         # Refresh courses
-#         course_result = controller.process_user_matching_request(
-#             user_id, 'course', force_refresh=force_refresh, limit=limit
-#         )
-
-#         print(f"Comprehensive refresh completed for user {user_id}:")
-#         print(
-#             f"  - Internal Jobs: {len(job_result.get('recommendations', []))}")
-#         print(
-#             f"  - External Jobs: {len(external_result.get('recommendations', []))}")
-#         print(f"  - Courses: {len(course_result.get('recommendations', []))}")
-
-#         # Cleanup and optimize
-#         controller.cleanup_and_optimize(user_id)
-
-#     except Exception as e:
-#         print(f"Comprehensive refresh error for user {user_id}: {e}")
-#     finally:
-#         session.close()
 
 
 @router.get("/system_stats")

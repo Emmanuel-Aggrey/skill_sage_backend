@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from fastapi import APIRouter, Request, Depends, status, UploadFile, Response
 from .middlewares import with_authentication
 from models.user import Role, UserResume, JobSeekerSkill
-from models.job import Job, Bookmark, JobApplication
+from models.job import Job, Bookmark, JobApplication, ExternalJob
 from models.user import User
 from db.connection import session
 from pydantic import BaseModel, EmailStr
@@ -179,7 +179,7 @@ async def delete_job(job_id: int, request: Request):
 
 @app_router.post("/bookmark/{item_id}")
 async def create_bookmark(item_id: str, request: Request):
-    user_id = 2  # request.state.user["id"]
+    user_id = request.state.user["id"]
 
     try:
         # Try to parse item_id as int to check if it's an internal job
@@ -241,33 +241,58 @@ async def get_user_bookmarks(request: Request):
     user_id = request.state.user["id"]
 
     try:
-        # Only get internal job bookmarks (the ones that have job_id)
         bookmarks = (
-            session.query(Job, Bookmark)
-            .join(Bookmark, Job.id == Bookmark.job_id)
+            session.query(Bookmark)
             .filter(Bookmark.user_id == user_id)
             .all()
         )
 
+        if not bookmarks:
+            return sendSuccess([])
+
         bookmark_list = []
-        for job, bookmark in bookmarks:
-            # Use bookmark.job_id if available, otherwise bookmark.external_job_id
-            key = bookmark.job_id if bookmark.job_id else bookmark.external_job_id
-            bk_dict = {
-                "id": key,
-                "title": job.title,
-                "location": job.location,
-                "expiry": job.expiry,
-                "salary": job.salary,
-                "description": job.description,
-                "requirements": job.requirements,
-                "image": job.image,
-                "type": job.type,
-                "position": job.position,
-                "skills": job.skills,
-                "company": job.company,
-            }
-            bookmark_list.append(bk_dict)
+        for bookmark in bookmarks:
+            if bookmark.job_id:  # internal job
+                job = session.query(Job).filter(
+                    Job.id == bookmark.job_id).first()
+                if job:
+                    bk_dict = {
+                        "id": job.id,
+                        "title": job.title,
+                        "location": job.location,
+                        "expiry": job.expiry,
+                        "salary": job.salary,
+                        "description": job.description,
+                        "requirements": job.requirements,
+                        "image": job.image,
+                        "type": job.type,
+                        "position": job.position,
+                        "skills": job.skills,
+                        "company": job.company,
+                        "is_external": False,
+                    }
+                    bookmark_list.append(bk_dict)
+            elif bookmark.external_job_id:  # external job
+                external_job = session.query(ExternalJob).filter(
+                    ExternalJob.id == bookmark.external_job_id).first()
+                if external_job:
+                    bk_dict = {
+                        "id": external_job.id,
+                        "title": external_job.title,
+                        "location": external_job.location,
+                        "expiry": None,
+                        "salary": None,
+                        "description": external_job.description,
+                        "requirements": None,
+                        "image": None,
+                        "type": external_job.job_type,
+                        "position": None,
+                        "skills": external_job.skills,
+                        "company": external_job.company,
+                        "is_external": True,
+                    }
+                    bookmark_list.append(bk_dict)
+
         return sendSuccess(bookmark_list)
     except Exception as err:
         session.rollback()
