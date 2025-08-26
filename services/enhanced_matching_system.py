@@ -575,10 +575,19 @@ class JobCourseMatchingService:
 
     def save_job_matches(self, user_id: int, matches: List[MatchResult]):
         """Save job matches to database"""
-        # from models.job import JobMatch, ExternalJobMatch  # Adjust import as needed
+        from models.job import JobMatch, ExternalJobMatch
+
+        saved_count = 0
+        error_count = 0
 
         for match in matches:
             try:
+                # Validate required fields
+                if not match.item_id or not match.match_score or not match.skill_match_count:
+                    print(f"Warning: Missing required fields for match: item_id={match.item_id}, "
+                          f"match_score={match.match_score}, skill_match_count={match.skill_match_count}")
+                    continue
+
                 if match.item_type == 'job':
                     # Check if match already exists
                     existing = self.session.query(JobMatch).filter(
@@ -590,7 +599,9 @@ class JobCourseMatchingService:
                         # Update existing match
                         existing.match_score = match.match_score
                         existing.skill_match_count = match.skill_match_count
-                        existing.missing_skills = match.missing_skills
+                        existing.missing_skills = match.missing_skills or []
+                        print(
+                            f"Updated existing job match for user {user_id}, job {match.item_id}")
                     else:
                         # Create new match
                         job_match = JobMatch(
@@ -598,9 +609,12 @@ class JobCourseMatchingService:
                             job_id=match.item_id,
                             match_score=match.match_score,
                             skill_match_count=match.skill_match_count,
-                            missing_skills=match.missing_skills
+                            missing_skills=match.missing_skills or []
                         )
                         self.session.add(job_match)
+                        print(
+                            f"Created new job match for user {user_id}, job {match.item_id}")
+                        saved_count += 1
 
                 elif match.item_type == 'external_job':
                     # Check if match already exists
@@ -613,7 +627,9 @@ class JobCourseMatchingService:
                         # Update existing match
                         existing.match_score = match.match_score
                         existing.skill_match_count = match.skill_match_count
-                        existing.missing_skills = match.missing_skills
+                        existing.missing_skills = match.missing_skills or []
+                        print(
+                            f"Updated existing external job match for user {user_id}, job {match.item_id}")
                     else:
                         # Create new match
                         external_job_match = ExternalJobMatch(
@@ -621,15 +637,32 @@ class JobCourseMatchingService:
                             external_job_id=match.item_id,
                             match_score=match.match_score,
                             skill_match_count=match.skill_match_count,
-                            missing_skills=match.missing_skills
+                            missing_skills=match.missing_skills or []
                         )
                         self.session.add(external_job_match)
+                        print(
+                            f"Created new external job match for user {user_id}, job {match.item_id}")
+                        saved_count += 1
+
+                else:
+                    print(
+                        f"Warning: Unknown item type '{match.item_type}' for match {match.item_id}")
 
             except Exception as e:
+                error_count += 1
                 print(f"Error saving match for item {match.item_id}: {e}")
                 continue
 
-        self.session.commit()
+        try:
+            self.session.commit()
+            print(
+                f"Successfully saved {saved_count} job matches for user {user_id}")
+            if error_count > 0:
+                print(f"Encountered {error_count} errors while saving matches")
+        except Exception as e:
+            print(f"Error committing job matches to database: {e}")
+            self.session.rollback()
+            raise
 
     def get_recommended_jobs(self, user_id: int, min_match_score: float = 40.0,
                              limit: int = 20) -> List[Dict[str, Any]]:

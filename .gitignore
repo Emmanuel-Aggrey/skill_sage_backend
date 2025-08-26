@@ -6,3 +6,6 @@ venv
 instance/
 main.sqlite
 
+logs/
+/logs
+logs

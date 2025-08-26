@@ -333,8 +333,7 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
     """Enhanced background task for generating matches with caching"""
     matching_service = JobCourseMatchingService(session)
     try:
-        # controller: EnhancedMatchingController = get_enhanced_controller(
-        #     session)
+        controller = get_enhanced_controller(session)
 
         # Process job matching
         job_result = controller.process_user_matching_request(
@@ -346,6 +345,26 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
             user_id, 'external_job', force_refresh=force_refresh, limit=50
         )
 
+        # Debug logging to see the structure of results
+        print(
+            f"Debug: Job result keys: {job_result.keys() if job_result else 'None'}")
+        print(
+            f"Debug: External job result keys: {external_job_result.keys() if external_job_result else 'None'}")
+
+        if job_result and 'recommendations' in job_result:
+            print(
+                f"Debug: Job recommendations count: {len(job_result['recommendations'])}")
+            if job_result['recommendations']:
+                print(
+                    f"Debug: First job recommendation: {job_result['recommendations'][0]}")
+
+        if external_job_result and 'recommendations' in external_job_result:
+            print(
+                f"Debug: External job recommendations count: {len(external_job_result['recommendations'])}")
+            if external_job_result['recommendations']:
+                print(
+                    f"Debug: First external job recommendation: {external_job_result['recommendations'][0]}")
+
         # Process course matching if enabled
         course_result = None
         if include_courses:
@@ -354,14 +373,21 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
             )
 
         for result in [job_result, external_job_result]:
-            recommendations = result.get('recommendations')
+            recommendations = result.get('recommendations', [])
             if recommendations:
-                # Get the type from the first item's `item_data['type']`
-                job_type = recommendations[0].get('item_data', {}).get('type')
-                if job_type:
-                    matches = convert_recommendations_to_match_results(
-                        recommendations, job_type)
-                    matching_service.save_job_matches(user_id, matches)
+                try:
+                    # Get the type from the first item's type field directly
+                    job_type = recommendations[0].get('type')
+                    if job_type:
+                        matches = convert_recommendations_to_match_results(
+                            recommendations, job_type)
+                        matching_service.save_job_matches(user_id, matches)
+                    else:
+                        print(
+                            f"Warning: No type found in recommendations for user {user_id}")
+                except Exception as e:
+                    print(f"Error saving matches for user {user_id}: {e}")
+                    continue
 
         print(f"Enhanced matching completed for user {user_id}:")
         print(f"  - Jobs: {len(job_result.get('recommendations', []))}")
@@ -390,14 +416,14 @@ def convert_recommendations_to_match_results(recommendations: List[Dict], item_t
     matches = []
     for rec in recommendations:
         match_result = MatchResult(
-            item_id=rec.get('item_id'),
+            item_id=rec.get('id'),  # Changed from 'item_id' to 'id'
             item_type=item_type,
             match_score=rec.get('match_score', 0),
             skill_match_count=rec.get('skill_match_count', 0),
             total_required_skills=rec.get('total_required_skills', 0),
             missing_skills=rec.get('missing_skills', []),
             matched_skills=rec.get('matched_skills', []),
-            item_data=rec.get('item_data', {})
+            item_data=rec  # Pass the entire record as item_data
         )
         matches.append(match_result)
 
