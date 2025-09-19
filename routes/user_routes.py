@@ -164,9 +164,7 @@ async def upload_resume(
     match_threshold: float = Query(
         40.0, description="Minimum match score threshold")
 ):
-    """
-    Enhanced resume upload with intelligent matching and caching
-    """
+
     user_id = request.state.user["id"]
 
     try:
@@ -288,16 +286,14 @@ async def upload_resume(
 
         session.commit()
 
-        # Clear any existing cache
-        controller.cache_manager.invalidate_user_cache(user_id)
-
-        # Schedule background matching if enabled
+        # Schedule background matching if enabled (cache will be cleared in background task)
         if auto_match:
             background_tasks.add_task(
                 enhanced_background_matching,
                 user_id,
                 match_threshold,
-                include_courses=True
+                include_courses=True,
+                force_refresh=True
             )
 
         return JSONResponse(
@@ -331,9 +327,33 @@ async def upload_resume(
 async def enhanced_background_matching(user_id: int, match_threshold: float = 40.0,
                                        include_courses: bool = True, force_refresh: bool = False):
     """Enhanced background task for generating matches with caching"""
-    matching_service = JobCourseMatchingService(session)
+    # Create a new session for the background task
+    from db.connection import engine
+    from sqlalchemy.orm import Session
+    bg_session = Session(bind=engine, autoflush=False, autocommit=False)
+
     try:
-        controller = get_enhanced_controller(session)
+        # Add a small delay to ensure the main transaction is committed
+        import asyncio
+        await asyncio.sleep(0.5)
+
+        matching_service = JobCourseMatchingService(bg_session)
+        controller = get_enhanced_controller(bg_session)
+
+        # Clear any existing cache for this user
+        controller.cache_manager.invalidate_user_cache(user_id)
+
+        # Debug: Check if user profile exists
+        user_profile = matching_service.get_user_profile_from_db(user_id)
+        print(
+            f"Background task - User {user_id} profile: {'Found' if user_profile else 'Not found'}")
+        if user_profile:
+            print(
+                f"Background task - User {user_id} skills count: {len(user_profile.skills)}")
+        else:
+            print(
+                f"Background task - Cannot proceed without user profile for user {user_id}")
+            return
 
         # Process job matching
         job_result = controller.process_user_matching_request(
@@ -341,6 +361,15 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
         )
 
         # Process external job matching
+        # Debug: Check external jobs before matching
+        from models.job import ExternalJob
+        external_jobs = bg_session.query(ExternalJob).filter(
+            ExternalJob.is_enabled == True).all()
+        jobs_with_skills = [
+            job for job in external_jobs if job.skills and len(job.skills) > 0]
+        print(
+            f"Background task - External jobs: {len(external_jobs)} total, {len(jobs_with_skills)} with skills")
+
         external_job_result = controller.process_user_matching_request(
             user_id, 'external_job', force_refresh=force_refresh, limit=50
         )
@@ -376,15 +405,15 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
             recommendations = result.get('recommendations', [])
             if recommendations:
                 try:
-                    # Get the type from the first item's type field directly
-                    job_type = recommendations[0].get('type')
+                    # Get the type from the first item's item_type field
+                    job_type = recommendations[0].get('item_type')
                     if job_type:
                         matches = convert_recommendations_to_match_results(
                             recommendations, job_type)
                         matching_service.save_job_matches(user_id, matches)
                     else:
                         print(
-                            f"Warning: No type found in recommendations for user {user_id}")
+                            f"Warning: No item_type found in recommendations for user {user_id}")
                 except Exception as e:
                     print(f"Error saving matches for user {user_id}: {e}")
                     continue
@@ -406,7 +435,7 @@ async def enhanced_background_matching(user_id: int, match_threshold: float = 40
                                                  "message": "Upload complete!"}
                                                 )
 
-        session.close()
+        bg_session.close()
 
 
 def convert_recommendations_to_match_results(recommendations: List[Dict], item_type: str) -> List:
@@ -416,7 +445,7 @@ def convert_recommendations_to_match_results(recommendations: List[Dict], item_t
     matches = []
     for rec in recommendations:
         match_result = MatchResult(
-            item_id=rec.get('id'),  # Changed from 'item_id' to 'id'
+            item_id=rec.get('item_id'),  # Use 'item_id' from recommendation
             item_type=item_type,
             match_score=rec.get('match_score', 0),
             skill_match_count=rec.get('skill_match_count', 0),
