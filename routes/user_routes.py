@@ -627,7 +627,7 @@ async def generate_recommendation_insights(user_id: int, recommendations: List[D
         return {}
 
 
-@router.get("/detailed_match_analysis/{item_type}/{item_id}")
+@router.get("/detailed_match_analysis/{item_type}/{item_id}/")
 async def get_detailed_match_analysis_v2(
     item_type: str,
     item_id: int,
@@ -1469,12 +1469,10 @@ async def update_profile(request: Request, data: UpdateProfile):
 @router.post("/image", status_code=status.HTTP_201_CREATED)
 async def upload_image(img: UploadFile, request: Request):
     user_id = request.state.user["id"]
+
     try:
         user = session.query(User).filter(User.id == user_id).first()
-        # if user.profile_image is not None:
-        #     file_delete = session.query(File).filter(File.filename).first()
-        #     session.delete(file_delete)
-        # http://143.198.235.166:3000/
+
         new_file = await img.read()
         fileSha = getSha(new_file)
         ex_chunk = img.filename.split(".")
