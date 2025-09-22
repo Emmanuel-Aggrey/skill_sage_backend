@@ -127,6 +127,27 @@
         border-radius: 6px;
       }
 
+      .feature-link {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 14px;
+        background: white;
+        color: var(--primary-color);
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+      }
+      
+      .feature-link:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+      
+
       .nav-links a:hover {
         color: var(--primary-color);
         background: rgba(99, 102, 241, 0.1);
@@ -519,22 +540,44 @@
                   Cross-platform mobile application for job seekers with
                   intuitive user experience
                 </p>
+                <a class="feature-link" 
+                   href="https://drive.google.com/file/d/1K134uu4oDXS1sXAAV5AK7GZkpElolcml/view?usp=sharing"  
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   title="Open the Flutter App">
+                   🔗 Click here
+                </a>
               </div>
+            
               <div class="feature-card">
-                <h4>💻 React Dashboard <a style="text-decoration: none;" href="https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app/dashboard"  target="_blank"  rel="noopener noreferrer" title="open the admin dashboard">click here</a></h4>
-                
+                <h4>💻 React Dashboard</h4>
                 <p style="color: black">
                   Administrative web interface for job management and analytics
                 </p>
+                <a class="feature-link" 
+                   href="https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app/dashboard"  
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   title="Open the React Dashboard">
+                   🔗 Click here
+                </a>
               </div>
+            
               <div class="feature-card">
-                <h4>🔧 FastAPI Backend <a style="text-decoration: none;" href="https://skill-sage-backend-njh6.onrender.com/docs"  target="_blank"  rel="noopener noreferrer" title="open the api documentation">click here</a></h4>
+                <h4>🔧 FastAPI Backend</h4>
                 <p style="color: black">
-                  High-performance API server with AI-powered matching
-                  algorithms
+                  High-performance API server with AI-powered matching algorithms
                 </p>
+                <a class="feature-link" 
+                   href="https://skill-sage-backend-njh6.onrender.com/docs"  
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   title="Open the API Documentation">
+                   🔗 Click here
+                </a>
               </div>
             </div>
+            
 
             <h3>✨ Key Features</h3>
             <ul>
