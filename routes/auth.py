@@ -69,6 +69,7 @@ async def login(request: Request, data: LoginData):
         user = session.query(User).join(JobSeeker).filter(
             User.email == data.email).first()
         if user is None:
+
             return sendError("user not found")
 
         user = session.query(User).join(JobSeeker).filter(
