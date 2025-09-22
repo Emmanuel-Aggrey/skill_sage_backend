@@ -882,7 +882,7 @@
 
             <div class="endpoint">
               <strong>1. Clone the repository</strong>
-              <pre><code>git clone &lt;repository-url&gt;
+              <pre><code>git clone https://github.com/Emmanuel-Aggrey/skill_sage_backend
 cd skill_sage</code></pre>
             </div>
 
@@ -900,15 +900,25 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate</code></pre>
             <div class="endpoint">
               <strong>4. Environment Configuration</strong>
               <pre><code># Create .env file with required variables
-GEMINI_API_KEY_01=your_gemini_api_key_1
-GEMINI_API_KEY_02=your_gemini_api_key_2
-DATABASE_URL=postgresql://user:password@localhost/skill_sage
-SECRET_KEY=your_secret_key</code></pre>
+  GEMINI_API_KEY_01=your_gemini_api_key_1
+  GEMINI_API_KEY_02=your_gemini_api_key_2
+  DATABASE_URL=postgresql://user:password@localhost/skill_sage
+  SECRET_KEY=your_secret_key
+  JWT_SECRET_KEY=your_jwt_secret_key
+  CACHE_JOB_MATCH_TTL_HOURS=24
+  CACHE_ENABLE_SEMANTIC_MATCHING=True
+  CACHE_MIN_CACHE_SCORE=30.0
+  MATCHING_DEFAULT_MIN_MATCH_SCORE=40.0
+  MATCHING_MAX_RECOMMENDATIONS=50
+  ACCESS_TOKEN_EXPIRE_MINUTES=720
+  FRONTEND_URL=http://localhost:3000,http://localhost:3001
+  BASE_URL=http://localhost:8004
+</code></pre>
             </div>
 
             <div class="endpoint">
               <strong>5. Start the server</strong>
-              <pre><code>uvicorn main:app --reload --host 0.0.0.0 --port 8004</code></pre>
+              <pre><code>uvicorn main:app --reload --host 0.0.0.0 --port 8004 OR ./run.sh</code></pre>
             </div>
 
             <h2 id="api-endpoints">🔗 API Endpoints  </h2>
@@ -982,22 +992,52 @@ uvicorn main:app --host 0.0.0.0 --port $PORT</code></pre>
 
   <div class="tech-category" style="margin-bottom:2rem;">
     <h4>Flutter App Deployment</h4>
-    <pre><code># Build APK
+    <pre><code>
+#Clone the repository
+git clone https://github.com/Emmanuel-Aggrey/skill_sage_mobile
+
+cd Skill-Sage
+
+#Install dependencies
+flutter pub get
+
+#Launche the app
+flutter run OR ./run.sh
+
+# Build APK
 flutter build apk --release
 
 # Build App Bundle
 flutter build appbundle --release
 
-# Deploy to Google Play Store</code>
+# Deploy to Google Play Store
 
-#or ./deploy.sh
+OR
+
+#./deploy.sh
+
+</code>
 </pre>
 
   </div>
 
   <div class="tech-category" style="margin-bottom:2rem;">
     <h4>React Dashboard Deployment (Netlify)</h4>
-    <pre><code># Build for production
+   
+    
+    <pre><code>
+# Clone the repository
+git clone https://github.com/Emmanuel-Aggrey/skill_sage_dashboard
+
+cd skill_sage_backend
+
+#Install dependencies
+npm install
+
+#Launche site  
+npm start 
+
+# Build for production
 npm run build
 
 # Deploy to Netlify
