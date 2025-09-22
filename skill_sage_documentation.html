@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skill Sage - AI-Powered Job Matching Platform</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .tech-stack {
+        display: block;
+      }
+      .tech-stack .tech-category {
+        margin-bottom: 2rem;
+      }
+      
+
+      :root {
+        --primary-color: #6366f1;
+        --secondary-color: #8b5cf6;
+        --accent-color: #06b6d4;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 12px;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        line-height: 1.7;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      li {
+        color: black;
+      }
+      /* Header */
+      .header {
+        background: var(--bg-gradient);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      p{
+        color: black !important;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><rect width="11" height="11" x="10" y="10" ry="2" fill="url(%23a)"/><rect width="11" height="11" x="30" y="10" ry="2" fill="url(%23a)"/><rect width="11" height="11" x="50" y="10" ry="2" fill="url(%23a)"/><rect width="11" height="11" x="70" y="10" ry="2" fill="url(%23a)"/><rect width="11" height="11" x="90" y="10" ry="2" fill="url(%23a)"/></svg>')
+          repeat;
+        opacity: 0.1;
+      }
+
+      .header h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, #fff, #e2e8f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header p {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Navigation */
+      .nav {
+        background: var(--bg-primary);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: var(--shadow);
+        padding: 20px 0;
+      }
+
+      .nav-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 8px 16px;
+        border-radius: 6px;
+      }
+
+      .nav-links a:hover {
+        color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+      }
+
+      /* Main Content */
+      .main {
+        padding: 60px 0;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 60px;
+        align-items: start;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: sticky;
+        top: 120px;
+        background: var(--bg-primary);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+      }
+
+      .sidebar h3 {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+      }
+
+      .toc {
+        list-style: none;
+      }
+
+      .toc li {
+        margin-bottom: 8px;
+      }
+
+      .toc a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        display: block;
+        padding: 6px 12px;
+        border-radius: 6px;
+      }
+
+      .toc a:hover {
+        color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+        transform: translateX(5px);
+      }
+
+      /* Article */
+      .article {
+        background: var(--bg-primary);
+        padding: 50px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+      }
+
+      .article h2 {
+        color: var(--primary-color);
+        font-size: 2.2rem;
+        margin: 50px 0 25px 0;
+        padding-bottom: 15px;
+        border-bottom: 3px solid var(--primary-color);
+        position: relative;
+      }
+
+      .article h2:first-child {
+        margin-top: 0;
+      }
+
+      .article h3 {
+        color: var(--secondary-color);
+        font-size: 1.6rem;
+        margin: 35px 0 20px 0;
+      }
+
+      .article h4 {
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        margin: 25px 0 15px 0;
+      }
+
+      .article p {
+        margin-bottom: 20px;
+        color: var(--text-secondary);
+        font-size: 1.05rem;
+      }
+
+      .article ul,
+      .article ol {
+        margin: 20px 0;
+        padding-left: 30px;
+      }
+
+      .article li {
+        margin-bottom: 10px;
+        color: var(--text-secondary);
+      }
+
+      .article li strong {
+        color: var(--text-primary);
+      }
+
+      /* Code Blocks */
+      .article pre {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 25px;
+        border-radius: var(--border-radius);
+        overflow-x: auto;
+        margin: 25px 0;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        line-height: 1.6;
+        box-shadow: var(--shadow);
+      }
+
+      .article code {
+        background: #f1f5f9;
+        color: var(--primary-color);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9em;
+      }
+
+      .article pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+      }
+
+      /* Feature Cards */
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+      }
+
+      .feature-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+      }
+
+      .feature-card h4 {
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      /* Architecture Diagram */
+      .architecture {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 40px;
+        border-radius: var(--border-radius);
+        margin: 30px 0;
+        font-family: "JetBrains Mono", monospace;
+        overflow-x: auto;
+        box-shadow: var(--shadow);
+      }
+
+      /* Tech Stack */
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+      }
+
+      .tech-category {
+        background: var(--bg-primary);
+        padding: 25px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .tech-category h4 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+      }
+
+      /* API Endpoints */
+      .endpoint {
+        background: #f8fafc;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 10px 0;
+        border-left: 4px solid var(--accent-color);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .endpoint strong {
+        color: var(--primary-color);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1024px) {
+        .content {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+
+        .sidebar {
+          position: static;
+          order: -1;
+        }
+
+        .nav-content {
+          justify-content: center;
+        }
+
+        .nav-links {
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2.5rem;
+        }
+
+        .header p {
+          font-size: 1.1rem;
+        }
+
+        .article {
+          padding: 30px 25px;
+        }
+
+        .nav-links {
+          gap: 15px;
+        }
+
+        .nav-links a {
+          padding: 6px 12px;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 0 15px;
+        }
+
+        .header {
+          padding: 60px 0;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .article {
+          padding: 25px 20px;
+        }
+
+        .article h2 {
+          font-size: 1.8rem;
+        }
+
+        .nav-links {
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+        }
+      }
+
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* Selection styling */
+      ::selection {
+        background: rgba(99, 102, 241, 0.2);
+        color: var(--primary-color);
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1>Skill Sage</h1>
+        <p>AI-Powered Job Matching Platform - Comprehensive Documentation</p>
+      </div>
+    </header>
+
+    <nav class="nav">
+      <div class="container">
+        <div class="nav-content">
+          <div class="logo">
+            <strong style="color: var(--primary-color); font-size: 1.2rem"
+              >📚 Documentation</strong
+            >
+          </div>
+          <ul class="nav-links">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#system-architecture">Architecture</a></li>
+            <li><a href="#technologies-used">Tech Stack</a></li>
+            <li><a href="#user-journey--features">Features</a></li>
+            <li><a href="#installation--setup">Setup</a></li>
+            <li><a href="#api-endpoints">API</a></li>
+            <li><a href="#deployment">Deploy</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <div class="container">
+        <div class="content">
+          <aside class="sidebar">
+            <h3>📑 Table of Contents</h3>
+            <ol class="toc">
+              <li><a href="#overview">Overview</a></li>
+              <li><a href="#system-architecture">System Architecture</a></li>
+              <li><a href="#technologies-used">Technologies Used</a></li>
+              <li>
+                <a href="#user-journey--features">User Journey & Features</a>
+              </li>
+              <li>
+                <a href="#backend-api-documentation"
+                  >Backend API Documentation</a
+                >
+              </li>
+              <li>
+                <a href="#frontend-applications">Frontend Applications</a>
+              </li>
+              <li>
+                <a href="#ai--machine-learning-features"
+                  >AI & Machine Learning Features</a
+                >
+              </li>
+              <li><a href="#installation--setup">Installation & Setup</a></li>
+              <li><a href="#api-endpoints">API Endpoints</a></li>
+              <li><a href="#deployment">Deployment</a></li>
+            </ol>
+          </aside>
+
+          <article class="article">
+            <h2 id="overview">🚀 Overview</h2>
+            <p>
+              Skill Sage is a comprehensive AI-powered job matching platform
+              that leverages natural language processing (NLP), machine
+              learning, and advanced recommendation systems to connect job
+              seekers with relevant opportunities. The platform consists of
+              three main components:
+            </p>
+
+            <div class="feature-grid">
+              <div class="feature-card">
+                <h4>📱 Flutter Mobile App</h4>
+                <p style="color: black">
+                  Cross-platform mobile application for job seekers with
+                  intuitive user experience
+                </p>
+              </div>
+              <div class="feature-card">
+                <h4>💻 React Dashboard <a style="text-decoration: none;" href="https://68a3f0b0adbb71e3ea5921f4--skill-sage-dashboard.netlify.app/dashboard"  target="_blank"  rel="noopener noreferrer" title="open the admin dashboard">click here</a></h4>
+                
+                <p style="color: black">
+                  Administrative web interface for job management and analytics
+                </p>
+              </div>
+              <div class="feature-card">
+                <h4>🔧 FastAPI Backend <a style="text-decoration: none;" href="https://skill-sage-backend-njh6.onrender.com/docs"  target="_blank"  rel="noopener noreferrer" title="open the api documentation">click here</a></h4>
+                <p style="color: black">
+                  High-performance API server with AI-powered matching
+                  algorithms
+                </p>
+              </div>
+            </div>
+
+            <h3>✨ Key Features</h3>
+            <ul>
+              <li>
+                <strong>🤖 AI-Powered Job Matching</strong>: Advanced
+                recommendation system using clustering and Jaccard similarity
+              </li>
+              <li>
+                <strong>📄 Resume Analysis</strong>: Intelligent parsing and
+                skill extraction from resumes
+              </li>
+              <li>
+                <strong>🔄 Real-time Job Scraping</strong>: Automated job
+                collection from multiple sources
+              </li>
+              <li>
+                <strong>🧠 Skill Transferability Analysis</strong>: Graph
+                theory-based skill mapping across occupations
+              </li>
+              <li>
+                <strong>⚡ Hybrid Recommendation System (HDCF)</strong>: Deep
+                learning-enhanced matching with semantic context
+              </li>
+            </ul>
+
+            <h2 id="system-architecture">🏗️ System Architecture</h2>
+            <div class="architecture">
+              <pre>
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Flutter App   │    │ React Dashboard │    │   Web Scrapers  │
+│   (Job Seekers) │    │ (Administrators)│    │  (External APIs)│
+└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
+          │                      │                      │
+          └──────────────────────┼──────────────────────┘
+                                 │
+                    ┌─────────────┴─────────────┐
+                    │     FastAPI Backend       │
+                    │   (Port 8004)             │
+                    │  ┌─────────────────────┐  │
+                    │  │   AI/ML Services    │  │
+                    │  │  - LLM (Gemini 2.0) │  │
+                    │  │  - Job Matching     │  │
+                    │  │  - Skill Analysis   │  │
+                    │  └─────────────────────┘  │
+                    └─────────────┬─────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │    PostgreSQL Database    │
+                    │   (User Data & Jobs)      │
+                    └───────────────────────────┘
+</pre
+              >
+            </div>
+
+            <h2 id="technologies-used">💻 Technologies Used</h2>
+
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>🔧 Backend Technologies</h4>
+                <ul>
+                  <li>
+                    <strong>FastAPI</strong>: Modern, high-performance web
+                    framework
+                  </li>
+                  <li>
+                    <strong>Python 3.7+</strong>: Core programming language
+                  </li>
+                  <li><strong>PostgreSQL</strong>: Primary database</li>
+                  <li>
+                    <strong>SQLAlchemy</strong>: ORM for database operations
+                  </li>
+                  <li><strong>Uvicorn</strong>: ASGI server</li>
+                  <li><strong>WebSockets</strong>: Real-time communication</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>🤖 AI & Machine Learning</h4>
+                <ul>
+                  <li><strong>Gemini 2.0 Flash</strong>: Google's LLM</li>
+                  <li>
+                    <strong>NLP</strong>: Text analysis and skill extraction
+                  </li>
+                  <li>
+                    <strong>Clustering Algorithms</strong>: Job categorization
+                  </li>
+                  <li><strong>Graph Theory</strong>: Skill transferability</li>
+                  <li><strong>HDCF</strong>: Advanced recommendation system</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>📱 Frontend Technologies</h4>
+                <ul>
+                  <li>
+                    <strong>Flutter</strong>: Cross-platform mobile development
+                  </li>
+                  <li><strong>React</strong>: Web dashboard interface</li>
+                  <li><strong>Riverpod</strong>: State management</li>
+                  <li><strong>Dio</strong>: HTTP client</li>
+                  <li>
+                    <strong>WebView Flutter</strong>: Embedded web content
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <h2 id="user-journey--features">👤 User Journey & Features</h2>
+
+            <h3>1. User Registration & Authentication</h3>
+            <pre><code>Registration → Email Verification → Profile Setup → Skill Assessment</code></pre>
+            <p><strong>Features:</strong></p>
+            <ul>
+              <li>Email-based registration with password hashing</li>
+              <li>JWT token-based authentication</li>
+              <li>Profile completion with skills, experience, and education</li>
+              <li>Resume upload with AI-powered parsing</li>
+            </ul>
+
+            <h3>2. Profile Management</h3>
+            <pre><code>Personal Info → Skills → Experience → Education → Resume Upload</code></pre>
+
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>Skills Management</h4>
+                <ul>
+                  <li>Add/remove technical and soft skills</li>
+                  <li>
+                    Skill level assessment (Beginner, Intermediate, Advanced)
+                  </li>
+                  <li>Skill search and auto-completion</li>
+                  <li>Skill categorization and tagging</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>Experience Tracking</h4>
+                <ul>
+                  <li>Work history with detailed descriptions</li>
+                  <li>Project portfolios</li>
+                  <li>Achievement tracking</li>
+                  <li>Career progression mapping</li>
+                </ul>
+              </div>
+            </div>
+
+            <h3>3. Resume Processing & Analysis</h3>
+            <pre><code>Resume Upload → AI Parsing → Skill Extraction → Profile Enhancement</code></pre>
+            <p><strong>AI-Powered Features:</strong></p>
+            <ul>
+              <li>Automatic skill extraction from resume text</li>
+              <li>Experience level assessment</li>
+              <li>Education qualification recognition</li>
+              <li>Skill gap analysis</li>
+              <li>Profile optimization suggestions</li>
+            </ul>
+
+            <h2 id="backend-api-documentation">🔧 Backend API Documentation</h2>
+
+            <h3>Core Services</h3>
+
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>1. User Management</h4>
+                <ul>
+                  <li>User Registration & Authentication</li>
+                  <li>Profile Management</li>
+                  <li>Skill Management</li>
+                  <li>Resume Processing</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>2. Job Management</h4>
+                <ul>
+                  <li>Job Scraping & Storage</li>
+                  <li>Job Recommendations</li>
+                  <li>Application Management</li>
+                  <li>Bookmark System</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>3. Course Management</h4>
+                <ul>
+                  <li>Course Discovery</li>
+                  <li>Skill-based Recommendations</li>
+                  <li>Learning Progress Tracking</li>
+                </ul>
+              </div>
+            </div>
+
+            <h3>AI/ML Services</h3>
+
+            <h4>1. LLM Service</h4>
+            <pre><code class="lang-python">class BaseLLMClient:
+    - Gemini 2.0 Flash integration
+    - API key rotation for reliability
+    - Content generation for job descriptions
+    - Skill analysis and matching</code></pre>
+
+            <h4>2. Job Scraper</h4>
+            <pre><code class="lang-python">class JobScraper:
+    - Multi-source job collection
+    - Data normalization and cleaning
+    - Duplicate detection and removal
+    - Scheduled scraping with APScheduler</code></pre>
+
+            <h2 id="frontend-applications">📱 Frontend Applications</h2>
+
+            <h3>Flutter Mobile App Structure</h3>
+            <div class="feature-grid">
+              <div class="feature-card">
+                <h4>🔐 Authentication</h4>
+                <p>Login, Register, Forgot Password</p>
+              </div>
+              <div class="feature-card">
+                <h4>📊 Dashboard</h4>
+                <p>Personalized job recommendations</p>
+              </div>
+              <div class="feature-card">
+                <h4>👤 Profile</h4>
+                <p>User information and skill management</p>
+              </div>
+              <div class="feature-card">
+                <h4>💼 Jobs</h4>
+                <p>Job listings and detailed analysis</p>
+              </div>
+            </div>
+
+            <h2 id="ai--machine-learning-features">
+              🧠 AI & Machine Learning Features
+            </h2>
+
+            <h3>1. Natural Language Processing (NLP)</h3>
+            <ul>
+              <li>
+                <strong>Resume Parsing</strong>: Intelligent extraction of
+                skills, experience, and education
+              </li>
+              <li>
+                <strong>Job Description Analysis</strong>: Automated
+                categorization and skill requirement extraction
+              </li>
+              <li>
+                <strong>Semantic Matching</strong>: Understanding context and
+                meaning beyond keyword matching
+              </li>
+            </ul>
+
+            <h3>2. Job Matching Algorithm</h3>
+            <pre><code class="lang-python">def calculate_job_match_score(user_skills, job_requirements):
+    # Jaccard similarity for skill overlap
+    skill_overlap = len(user_skills & job_requirements) / len(user_skills | job_requirements)
+
+    # Experience level matching
+    experience_score = calculate_experience_match(user_experience, job_experience)
+
+    # Location preference scoring
+    location_score = calculate_location_match(user_location, job_location)
+
+    # Weighted combination
+    final_score = (skill_overlap * 0.5) + (experience_score * 0.3) + (location_score * 0.2)
+
+    return final_score</code></pre>
+
+            <h2 id="installation--setup">⚙️ Installation & Setup</h2>
+
+            <h3>Backend Setup (FastAPI)</h3>
+
+            <div class="endpoint">
+              <strong>1. Clone the repository</strong>
+              <pre><code>git clone &lt;repository-url&gt;
+cd skill_sage</code></pre>
+            </div>
+
+            <div class="endpoint">
+              <strong>2. Create virtual environment</strong>
+              <pre><code>python3 -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate</code></pre>
+            </div>
+
+            <div class="endpoint">
+              <strong>3. Install dependencies</strong>
+              <pre><code>pip install -r requirements.txt</code></pre>
+            </div>
+
+            <div class="endpoint">
+              <strong>4. Environment Configuration</strong>
+              <pre><code># Create .env file with required variables
+GEMINI_API_KEY_01=your_gemini_api_key_1
+GEMINI_API_KEY_02=your_gemini_api_key_2
+DATABASE_URL=postgresql://user:password@localhost/skill_sage
+SECRET_KEY=your_secret_key</code></pre>
+            </div>
+
+            <div class="endpoint">
+              <strong>5. Start the server</strong>
+              <pre><code>uvicorn main:app --reload --host 0.0.0.0 --port 8004</code></pre>
+            </div>
+
+            <h2 id="api-endpoints">🔗 API Endpoints  </h2>
+           
+
+            <p>
+                Swagger docs: <br> <br>
+                <a class="endpoint" href="https://skill-sage-backend-njh6.onrender.com/docs"> https://skill-sage-backend-njh6.onrender.com/docs  </a>
+            </p>
+             
+            <h3>Authentication Endpoints</h3>
+            <div class="endpoint">
+              <strong>POST</strong> /auth/register - User registration
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /auth/login - User login
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /auth/logout - User logout
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /auth/refresh - Token refresh
+            </div>
+
+            <h3>User Management</h3>
+            <div class="endpoint">
+              <strong>GET</strong> /user/ - Get user profile
+            </div>
+            <div class="endpoint">
+              <strong>PUT</strong> /user/profile - Update user profile
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /user/skills - Add skills
+            </div>
+            <div class="endpoint">
+              <strong>DELETE</strong> /user/skills - Remove skills
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /user/upload_resume - Upload resume
+            </div>
+
+            <h3>Job Management</h3>
+            <div class="endpoint">
+              <strong>GET</strong> /job/ - Get all jobs
+            </div>
+            <div class="endpoint">
+              <strong>GET</strong> /job/{id} - Get specific job
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /job/bookmark/{id} - Bookmark job
+            </div>
+            <div class="endpoint">
+              <strong>POST</strong> /job/application/{id} - Apply for job
+            </div>
+            <div class="endpoint">
+              <strong>GET</strong> /job/recommendations - Get job
+              recommendations
+            </div>
+
+            
+
+            <h2 id="deployment">🚀 Deployment</h2>
+
+<div class="tech-stack" style="display:block;">
+  <div class="tech-category" style="margin-bottom:2rem;">
+    <h4>Backend Deployment (AWS/Render/Railway)</h4>
+    <pre><code># Build and deploy
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port $PORT</code></pre>
+  </div>
+
+  <div class="tech-category" style="margin-bottom:2rem;">
+    <h4>Flutter App Deployment</h4>
+    <pre><code># Build APK
+flutter build apk --release
+
+# Build App Bundle
+flutter build appbundle --release
+
+# Deploy to Google Play Store</code>
+
+#or ./deploy.sh
+</pre>
+
+  </div>
+
+  <div class="tech-category" style="margin-bottom:2rem;">
+    <h4>React Dashboard Deployment (Netlify)</h4>
+    <pre><code># Build for production
+npm run build
+
+# Deploy to Netlify
+netlify deploy --prod --dir=build</code></pre>
+  </div>
+</div>
+
+
+
+            <h2 id="key-algorithms">
+              🔬 Key Algorithms & Implementation Details
+            </h2>
+
+            <h3>1. Skill Transferability Analysis</h3>
+            <pre><code class="lang-python">def analyze_skill_transferability(skill_graph):
+    # Calculate centrality metrics
+    betweenness_centrality = nx.betweenness_centrality(skill_graph)
+    closeness_centrality = nx.closeness_centrality(skill_graph)
+
+    # Identify transferable skills
+    transferable_skills = []
+    for skill, centrality in betweenness_centrality.items():
+        if centrality > threshold:
+            transferable_skills.append(skill)
+
+    return transferable_skills</code></pre>
+
+            <h3>2. Hybrid Deep Collaborative Filtering</h3>
+            <pre><code class="lang-python">class HDCFModel:
+    def __init__(self):
+        self.user_embedding = UserEmbeddingLayer()
+        self.job_embedding = JobEmbeddingLayer()
+        self.semantic_layer = SemanticContextLayer()
+        self.fusion_layer = FusionLayer()
+
+    def forward(self, user_features, job_features, context):
+        user_vec = self.user_embedding(user_features)
+        job_vec = self.job_embedding(job_features)
+        context_vec = self.semantic_layer(context)
+
+        # Fusion of embeddings
+        combined = self.fusion_layer(user_vec, job_vec, context_vec)
+
+        return torch.sigmoid(combined)</code></pre>
+
+            <h2 id="performance">⚡ Performance & Scalability</h2>
+
+            <div class="feature-grid">
+              <div class="feature-card">
+                <h4>🗄️ Database Optimization</h4>
+                <ul>
+                  <li style="color: black">
+                    Strategic indexing on frequently queried columns
+                  </li>
+                  <li style="color: black">
+                    Efficient database connection management
+                  </li>
+                  <li style="color: black">
+                    Optimized SQL queries with proper joins
+                  </li>
+                </ul>
+              </div>
+
+              <div class="feature-card">
+                <h4>💾 Caching Strategy</h4>
+                <ul>
+                  <li style="color: black">
+                    Redis Integration for session caching
+                  </li>
+                  <li style="color: black">
+                    CDN for static asset delivery optimization
+                  </li>
+                  <li style="color: black">
+                    Browser caching for improved performance
+                  </li>
+                </ul>
+              </div>
+
+              <div class="feature-card">
+                <h4>📊 Monitoring & Analytics</h4>
+                <ul>
+                  <li style="color: black">
+                    API performance and response time monitoring
+                  </li>
+                  <li style="color: black">
+                    Comprehensive error logging and analysis
+                  </li>
+                  <li style="color: black">
+                    User engagement and conversion tracking
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <h2 id="security">🔐 Security Implementation</h2>
+
+            <h3>Authentication & Authorization</h3>
+            <ul>
+              <li style="color: black">
+                <strong>🔑 JWT Tokens</strong>: Secure token-based
+                authentication
+              </li>
+              <li style="color: black">
+                <strong>🛡️ Password Hashing</strong>: bcrypt for password
+                security
+              </li>
+              <li style="color: black">
+                <strong>🌐 CORS Configuration</strong>: Proper cross-origin
+                resource sharing
+              </li>
+              <li style="color: black">
+                <strong>✅ Input Validation</strong>: Comprehensive input
+                sanitization
+              </li>
+            </ul>
+
+            <h3>Data Protection</h3>
+            <ul>
+              <li style="color: black">
+                <strong>🔒 Encryption</strong>: Sensitive data encryption at
+                rest and in transit
+              </li>
+              <li style="color: black">
+                <strong>📋 GDPR Compliance</strong>: User data privacy and right
+                to deletion
+              </li>
+              <li style="color: black">
+                <strong>🚫 API Rate Limiting</strong>: Protection against abuse
+                and DDoS attacks
+              </li>
+            </ul>
+
+            <h2 id="future-enhancements">🚀 Future Enhancements</h2>
+
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>🔮 Planned Features</h4>
+                <ul>
+                  <li style="color: black">
+                    <strong>Advanced AI Integration</strong>: GPT-4 integration
+                    for enhanced matching
+                  </li>
+                  <li style="color: black">
+                    <strong>Video Interviewing</strong>: Built-in video
+                    interview capabilities
+                  </li>
+                  <li>
+                    <strong>Skill Assessment Tests</strong>: Automated skill
+                    evaluation quizzes
+                  </li>
+                  <li style="color: black">
+                    <strong>Career Path Planning</strong>: AI-powered career
+                    trajectory recommendations
+                  </li>
+                  <li style="color: black">
+                    <strong>Multi-language Support</strong>:
+                    Internationalization and localization
+                  </li>
+                  <li style="color: black">
+                    <strong>Blockchain Integration</strong>: Verifiable
+                    credentials and certificates
+                  </li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>🛠️ Technical Improvements</h4>
+                <ul>
+                  <li style="color: black">
+                    <strong>Microservices Architecture</strong>: Service
+                    decomposition for better scalability
+                  </li>
+                  <li style="color: black">
+                    <strong>GraphQL API</strong>: More efficient data fetching
+                  </li>
+                  <li style="color: black">
+                    <strong>Real-time Chat</strong>: Integrated messaging
+                    between employers and candidates
+                  </li>
+                  <li style="color: black">
+                    <strong>Advanced Analytics</strong>: Machine
+                    learning-powered insights and predictions
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <h2 id="external-integrations">🔗 External Integrations</h2>
+
+            <div class="feature-grid">
+              <div class="feature-card">
+                <h4>🌐 Job Scraping Sources</h4>
+                <ul>
+                  <li style="color: black">RemoteOK</li>
+                  <li style="color: black">We Work Remotely</li>
+                  <li style="color: black">StackOverflow (API)</li>
+                  <li style="color: black">Greenhouse</li>
+                  <li style="color: black">Business Ghana</li>
+                </ul>
+              </div>
+
+              <div class="feature-card">
+                <h4>🎥 Content Integration</h4>
+                <ul>
+                  <li style="color: black">
+                    YouTube API for educational content
+                  </li>
+                  <li style="color: black">
+                    PDF Processing for resume parsing
+                  </li>
+                  <li style="color: black">Video learning recommendations</li>
+                  <li style="color: black">Interactive course materials</li>
+                </ul>
+              </div>
+            </div>
+
+            <h2 id="testing-quality">🧪 Testing & Quality Assurance</h2>
+
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>Backend Testing</h4>
+                <ul>
+                  <li style="color: black">Unit tests with pytest</li>
+                  <li style="color: black">
+                    Integration testing for API endpoints
+                  </li>
+                  <li>Load testing for scalability</li>
+                  <li>Security testing and vulnerability assessment</li>
+                </ul>
+              </div>
+
+              <div class="tech-category">
+                <h4>Frontend Testing</h4>
+                <ul>
+                  <li>Widget testing in Flutter</li>
+                  <li>Component testing in React</li>
+                  <li>End-to-end testing with automation</li>
+                  <li>Performance testing and optimization</li>
+                </ul>
+              </div>
+            </div>
+
+            <h2 id="monitoring-logging">📈 Monitoring & Logging</h2>
+
+            <h3>Application Monitoring</h3>
+            <ul>
+              <li>
+                <strong>📊 Performance Metrics</strong>: Response time,
+                throughput, error rates
+              </li>
+              <li>
+                <strong>🎯 User Analytics</strong>: User behavior tracking and
+                engagement metrics
+              </li>
+              <li>
+                <strong>🔄 Real-time Dashboards</strong>: Live system status and
+                performance monitoring
+              </li>
+              <li>
+                <strong>⚠️ Alert System</strong>: Automated notifications for
+                critical issues
+              </li>
+            </ul>
+
+            <h3>Logging Strategy</h3>
+            <pre><code class="lang-python"># Structured logging implementation
+import logging
+import json
+from datetime import datetime
+
+class StructuredLogger:
+    def __init__(self, name):
+        self.logger = logging.getLogger(name)
+        
+    def log_api_request(self, endpoint, method, user_id, duration):
+        log_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "event_type": "api_request",
+            "endpoint": endpoint,
+            "method": method,
+            "user_id": user_id,
+            "duration_ms": duration
+        }
+        self.logger.info(json.dumps(log_data))</code></pre>
+
+            <hr
+              style="
+                margin: 50px 0;
+                border: none;
+                height: 2px;
+                background: linear-gradient(
+                  90deg,
+                  var(--primary-color),
+                  var(--secondary-color)
+                );
+              "
+            />
+
+            <h2 id="conclusion">🎯 Conclusion</h2>
+            <p>
+              Skill Sage represents a comprehensive solution for modern job
+              matching, combining cutting-edge AI technologies with
+              user-friendly interfaces. The platform's hybrid approach to
+              recommendation systems, advanced NLP capabilities, and real-time
+              job scraping make it a powerful tool for both job seekers and
+              employers.
+            </p>
+
+            <div class="feature-grid">
+              <div class="feature-card">
+                <h4>🏗️ Modular Architecture</h4>
+                <p style="color: black">
+                  Ensures scalability and maintainability for future growth and
+                  feature expansion
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <h4>🤖 AI Integration</h4>
+                <p style="color: black"></p>
+                  Multiple AI technologies provide sophisticated matching beyond
+                  simple keyword matching
+                </p>
+              </div>
+
+              <div class="feature-card">
+                <h4>📈 Smart Insights</h4>
+                <p style="color: black"></p>>
+                  Understanding context, skill transferability, and career
+                  progression potential
+                </p>
+              </div>
+            </div>
+
+            <h3>📞 Contact & Support</h3>
+            <p>
+              For technical support, feature requests, or contributions, please
+              contact the development team:
+            </p>
+            <ul>
+              <li><strong>📧 Email</strong>: aggrey.en@gmail.com</li>
+              <li>
+                <strong>📧 Email</strong>: akornorjosephmawutor7227@gmail.com
+              </li>
+            </ul>
+
+            <h3>📚 Repository Links</h3>
+            <div class="tech-stack">
+              <div class="tech-category">
+                <h4>🔗 GitHub Repositories</h4>
+                <ul>
+                  <li>
+                    <strong>Backend</strong>:
+                    <a
+                      href="https://github.com/Emmanuel-Aggrey/skill_sage_backend"
+                      style="color: var(--primary-color)"
+                      >skill_sage_backend</a
+                    >
+                  </li>
+                  <li>
+                    <strong>Mobile App</strong>:
+                    <a
+                      href="https://github.com/Emmanuel-Aggrey/skill_sage_mobile"
+                      style="color: var(--primary-color)"
+                      >skill_sage_mobile</a
+                    >
+                  </li>
+                  <li>
+                    <strong>Dashboard</strong>:
+                    <a
+                      href="https://github.com/Emmanuel-Aggrey/skill_sage_dashboard"
+                      style="color: var(--primary-color)"
+                      >skill_sage_dashboard</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div
+              style="
+                text-align: center;
+                margin-top: 50px;
+                padding: 30px;
+                background: var(--bg-gradient);
+                color: white;
+                border-radius: var(--border-radius);
+              "
+            >
+              <h3 style="color: #06b6d4">🚀 Ready to Get Started?</h3>
+              <p style="color: black">
+                Follow the installation guide above and start exploring the
+                power of AI-driven job matching!
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      style="
+        background: var(--text-primary);
+        color: white;
+        text-align: center;
+        padding: 40px 0;
+        margin-top: 60px;
+      "
+    >
+      <div class="container">
+        <p>&copy; 2024 Skill Sage - AI-Powered Job Matching Platform</p>
+        <p style="opacity: 0.7; margin-top: 10px">
+          Built with ❤️ using FastAPI, Flutter, and React
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
+
+      // Add active states to navigation
+      const observerOptions = {
+        rootMargin: "-100px 0px -50% 0px",
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const navLink = document.querySelector(
+              `a[href="#${entry.target.id}"]`
+            );
+            document
+              .querySelectorAll(".nav-links a, .toc a")
+              .forEach((link) => {
+                link.style.color = "var(--text-secondary)";
+                link.style.background = "transparent";
+              });
+            if (navLink) {
+              navLink.style.color = "var(--primary-color)";
+              navLink.style.background = "rgba(99, 102, 241, 0.1)";
+            }
+            const tocLink = document.querySelector(
+              `.toc a[href="#${entry.target.id}"]`
+            );
+            if (tocLink) {
+              tocLink.style.color = "var(--primary-color)";
+              tocLink.style.background = "rgba(99, 102, 241, 0.1)";
+            }
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll("h2[id]").forEach((heading) => {
+        observer.observe(heading);
+      });
+
+      // Add loading animation
+      window.addEventListener("load", () => {
+        document.body.style.opacity = "0";
+        document.body.style.transition = "opacity 0.3s ease-in-out";
+        setTimeout(() => {
+          document.body.style.opacity = "1";
+        }, 100);
+      });
+    </script>
+  </body>
+</html>

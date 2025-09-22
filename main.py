@@ -1,3 +1,4 @@
+from fastapi.responses import HTMLResponse
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.connection import initDB
@@ -62,11 +63,6 @@ app.include_router(yt_router)
 app.include_router(app_router)
 
 
-# @app.get("/")
-# def hello_world():
-#     return "Hello"
-
-
 @app.websocket("/ws/{user_id}/")
 async def websocket_endpoint(websocket: WebSocket, user_id: str):
     import logging
@@ -102,3 +98,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
 @app.get("/healthcheck")
 def healthcheck():
     return "OK"
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    with open("skill_sage_documentation.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
