@@ -11,6 +11,7 @@ from ping_render import lifespan
 from settings import BASE_URL, FRONTEND_URL
 from services.websocket_manager import ws_manager
 from fastapi import WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
 
 load_dotenv()
 initDB()
@@ -102,3 +103,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
 @app.get("/healthcheck")
 def healthcheck():
     return "OK"
+
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    with open("skill_sage_documentation.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
