@@ -553,6 +553,25 @@ class EnhancedMatchingController:
                             "type": "external_job"
                         })
 
+                elif item_type == 'external_job':
+                    from models import ExternalJob
+                    external_jobs = self.session.query(ExternalJob).filter(
+                        ExternalJob.is_active.is_(True),
+                        ExternalJob.is_enabled.is_(True)
+                    ).all()
+
+                    all_items = []
+                    for job in external_jobs:
+                        all_items.append({
+                            "id": job.id,
+                            "title": job.title,
+                            "company": job.company,
+                            "location": job.location,
+                            "description": job.description or "",
+                            "skills": job.skills or [],
+                            "type": "external_job"
+                        })
+
                 elif item_type == 'course':
                     from models import Course
                     courses = self.session.query(Course).filter(

@@ -123,7 +123,8 @@ class BaseLLMClient:
         # Allow more attempts for retries
         max_attempts = len(self.api_keys) * 2
 
-        self.request_count = 0
+        # self.request_count = 0
+        attempt_count = 0
 
         for attempt in range(max_attempts):
             try:
@@ -133,10 +134,9 @@ class BaseLLMClient:
                         break
                     continue
 
-                self.request_count += 1
+                attempt_count += 1
                 print(
-                    f"🔄 Attempting with key #{self.current_key + 1} (attempt {self.request_count + 1})")
-
+                    f"🔄 Attempting with key #{self.current_key + 1} (attempt {attempt_count})")
                 # Make request
                 payload = {"contents": [{"parts": [{"text": prompt}]}]}
                 headers = {
@@ -152,7 +152,7 @@ class BaseLLMClient:
                 if response.status_code == 200:
                     result = response.json()
                     print(
-                        f"✅ Success with key #{self.current_key + 1} on attempt {self.request_count + 1}")
+                        f"✅ Success with key #{self.current_key + 1} on attempt {attempt_count}")
 
                     # Log successful call
                     self._log_api_call(self.current_key, True)
